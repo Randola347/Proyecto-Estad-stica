@@ -252,7 +252,10 @@
                                 <p id="mean"></p>
                                 <p id="median"></p>
                                 <p id="mode"></p>
+                                <div id="quartiles"></div>
+                                <div id="percentiles"></div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -411,15 +414,15 @@
 
                 // Ajustar el tamaño del canvas para hacer la gráfica más grande
                 if (chartType === 'radar' || chartType === 'pie') {
-                    document.getElementById('myChart').style.width = "700px"; // Aumentar el ancho
-                    document.getElementById('myChart').style.height = "700px"; // Aumentar la altura
+                    document.getElementById('myChart').style.width = "700px";
+                    document.getElementById('myChart').style.height = "700px";
                 } else {
                     document.getElementById('myChart').style.width = "100%";
                     document.getElementById('myChart').style.height = "400px";
                 }
 
                 let chartConfig = {
-                    type: chartType,
+                    type: chartType === 'horizontalBar' ? 'bar' : chartType,
                     data: {
                         labels: labels,
                         datasets: datasets.map((ds, index) => ({
@@ -438,20 +441,28 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        indexAxis: chartType === 'horizontalBar' ? 'y' : 'x',
                         plugins: {
                             legend: { position: 'top' },
                             title: {
                                 display: false
                             },
                             datalabels: {
-                                anchor: 'end',
-                                align: 'end',
-                                formatter: (value) => value,
-                                color: '#555',
+                                anchor: 'center',
+                                align: 'center',
+                                formatter: (value) => value.toFixed(2),
+                                color: '#fff',
                                 font: {
                                     weight: 'bold'
-                                }
+                                },
+                                // Colocar etiquetas dentro de las barras, líneas, etc.
+                                clamp: true,
+                                clip: false
                             }
+                        },
+                        scales: chartType === 'pie' ? {} : {
+                            x: { beginAtZero: true },
+                            y: { beginAtZero: true }
                         }
                     },
                     plugins: [ChartDataLabels]
@@ -461,7 +472,7 @@
                 if (chartType === 'pie') {
                     const data = labelData.map(ld => {
                         const numericData = ld.data.filter(value => !isNaN(value));
-                        return numericData.length > 0 ? math.mean(numericData) : 0; // Calcular el promedio
+                        return numericData.length > 0 ? math.mean(numericData) : 0;
                     });
 
                     chartConfig.data = {
@@ -472,7 +483,17 @@
                             borderWidth: 1
                         }]
                     };
-                    chartConfig.options.plugins.datalabels.formatter = (value) => value.toFixed(2);
+
+                    chartConfig.options.plugins.datalabels = {
+                        anchor: 'center',
+                        align: 'center',
+                        formatter: (value) => value.toFixed(2),
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        }
+                    };
                 } else if (chartType === 'radar') {
                     chartConfig.options.scales = {
                         r: {
@@ -499,7 +520,6 @@
 
                 document.getElementById('chartDescription').innerText = document.getElementById('chartDesc').value;
             }
-
 
             function calculateFrequencyDistribution(data) {
                 const min = Math.min(...data);
@@ -615,10 +635,25 @@
 
                 const mode = calculateMode(allData);
 
+                // Calcular cuartiles y percentiles
+                const quartiles = calculateQuartiles(allData);
+                const percentiles = calculatePercentiles(allData);
+
                 // Mostrar los resultados
                 document.getElementById('mean').innerText = `Media: ${mean}`;
                 document.getElementById('median').innerText = `Mediana: ${median}`;
                 document.getElementById('mode').innerText = mode;
+                document.getElementById('quartiles').innerHTML = `
+        <strong>Cuartiles:</strong><br>
+        Q1: ${quartiles.Q1}<br>
+        Q2 (Mediana): ${quartiles.Q2}<br>
+        Q3: ${quartiles.Q3}
+    `;
+                document.getElementById('percentiles').innerHTML = `
+        <strong>Percentil 25:</strong> ${percentiles.P25}<br>
+        <strong>Percentil 50 (Mediana):</strong> ${percentiles.P50}<br>
+        <strong>Percentil 75:</strong> ${percentiles.P75}
+    `;
             }
 
             function calculateMode(data) {
@@ -626,7 +661,6 @@
                 let maxFrequency = 0;
                 let mode = [];
 
-                // Calcular las frecuencias de cada valor
                 data.forEach(value => {
                     const count = modeMap.get(value) || 0;
                     modeMap.set(value, count + 1);
@@ -635,14 +669,12 @@
                     }
                 });
 
-                // Determinar los valores con la frecuencia máxima
                 modeMap.forEach((frequency, value) => {
                     if (frequency === maxFrequency) {
                         mode.push(value);
                     }
                 });
 
-                // Si hay más de 2 modos que se repiten igual de veces, no hay moda
                 if (mode.length >= 3) {
                     return "Sin moda.";
                 } else if (mode.length === 1) {
@@ -652,6 +684,29 @@
                 }
             }
 
+            function calculateQuartiles(data) {
+                const Q1 = calculatePercentile(data, 25);
+                const Q2 = calculatePercentile(data, 50); // Mediana
+                const Q3 = calculatePercentile(data, 75);
+
+                return { Q1, Q2, Q3 };
+            }
+
+            function calculatePercentiles(data) {
+                const P25 = calculatePercentile(data, 25);
+                const P50 = calculatePercentile(data, 50);
+                const P75 = calculatePercentile(data, 75);
+
+                return { P25, P50, P75 };
+            }
+
+            function calculatePercentile(data, percentile) {
+                const index = (percentile / 100) * (data.length - 1);
+                const lower = Math.floor(index);
+                const upper = Math.ceil(index);
+                if (lower === upper) return data[lower];
+                return (data[lower] + (index - lower) * (data[upper] - data[lower])).toFixed(2);
+            }
 
             function calculateClassLimits(data, classCount) {
                 const min = Math.min(...data);
