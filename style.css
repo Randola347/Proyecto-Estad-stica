@@ -46,13 +46,29 @@ th input {
     padding: 20px;
 }
 
+/* Ajustes para asegurar que la tabla tenga scroll horizontal cuando sea necesario */
 .table-container {
-    overflow-x: hidden;
+    overflow-x: auto; /* Activar el scroll horizontal siempre */
+    overflow-y: hidden;
     display: flex;
+    border: 1px solid #000; /* Borde negro opcional */
+    width: 100%;
 }
 
 .table {
-    width: 100%;
+    width: auto; /* Permitir que la tabla crezca según el contenido */
+    min-width: 1200px; /* Asegura que la tabla tenga un ancho mínimo para mantener los campos grandes */
+    table-layout: fixed; /* Mantener las columnas a un tamaño constante */
+}
+
+th, td {
+    white-space: nowrap; /* Evitar que el contenido se rompa en varias líneas */
+}
+
+th input, td input {
+    min-width: 100px; /* Ajustar el ancho mínimo de los campos para que no se encojan */
+    width: 100%; /* Mantener el tamaño completo del campo */
+    text-align: center;
 }
 
 thead th:first-child,
@@ -133,7 +149,7 @@ body.modal-open {
     background-color: #138496;
 }
 
-/* campo de texto que muestra el archivo seleccionado de excel*/
+/* campo de texto que muestra el archivo seleccionado de excel */
 #fileNameDisplay {
     width: 300px;
     margin-left: 10px;
@@ -150,7 +166,7 @@ body.modal-open {
     outline: none;
 }
 
-/*descargar pdf o png*/
+/* Descargar PDF o PNG */
 .modal-footer .btn-danger,
 .modal-footer .btn-info {
     padding: 8px 16px;
@@ -179,13 +195,3 @@ body.modal-open {
 .modal-footer .btn-danger:hover {
     background-color: #c82333;
 }
-
-/*poner el modal mas grande para todas las graficas*/
-
-/* #chartModal .modal-dialog {
-    max-width: 90%; }/* Asegurar que el modal sea lo suficientemente grande */
-
-/*#myChart {
-    max-width: 100%;
-    height: auto;
-}*/
