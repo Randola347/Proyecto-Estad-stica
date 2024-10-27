@@ -8,9 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Cargar el plugin para etiquetas de datos -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <!-- Librería html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Librería jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
     <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
@@ -25,14 +28,6 @@
             <input type="text" class="form-control" id="chartDesc" placeholder="Añade una descripción a tu gráfico">
         </div>
 
-        <div class="table-controls">
-            <button class="btn btn-info" onclick="importExcel()">Importar Excel</button>
-            <input type="text" id="fileNameDisplay" class="form-control mt-2" placeholder="Ningún archivo seleccionado"
-                readonly>
-        </div>
-        <input type="file" id="excelInput" accept=".xls,.xlsx" style="display:none"
-            onchange="handleFileUpload(event, 'excel')">
-
         <div class="mb-3">
             <label class="form-label">Tipos de Gráfico</label><br>
             <input type="radio" name="chartType" value="bar" checked> Barras
@@ -42,18 +37,19 @@
             <input type="radio" name="chartType" value="horizontalBar"> Barras Horizontales
         </div>
 
-
         <h4>Datos Del Gráfico</h4>
         <div class="table-container">
             <table id="dataTable" class="table">
                 <thead>
                     <tr>
+                        <!-- Cambiado de <th></th> a <th>Etiqueta</th> -->
                         <th></th>
                         <th><input type="text" class="form-control" placeholder="Atributo"></th>
                         <th><input type="text" class="form-control" placeholder="Atributo"></th>
                         <th class="table-controls">
                             <button class="btn btn-success btn-sm" onclick="addColumn()">Agregar Columna</button>
-                            <button class="btn btn-danger btn-sm" onclick="removeColumn()">Eliminar Columna</button>
+                            <button class="btn btn-danger btn-sm" onclick="removeColumn(this)">Eliminar Columna</button>
+                            <!-- Pasar 'this' como parámetro para identificar la columna a eliminar -->
                         </th>
                     </tr>
                 </thead>
@@ -67,7 +63,6 @@
                             <button class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar Fila</button>
                         </td>
                     </tr>
-
                 </tbody>
             </table>
         </div>
@@ -76,6 +71,7 @@
             <button class="btn btn-primary" id="showChartButton">Ver Gráfica</button>
             <button class="btn btn-secondary" id="showStatsButton">Ver Medidas Estadísticas</button>
         </div>
+
         <!-- Modal para Ver Tabla -->
         <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -108,6 +104,8 @@
                 </div>
             </div>
         </div>
+
+
         <!-- Modal para Ver Gráficas -->
         <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -116,11 +114,12 @@
                         <h5 class="modal-title" id="chartModalLabel"></h5>
                         <button type="button" class="btn btn-success" data-bs-dismiss="modal">Volver</button>
                     </div>
-
                     <div class="modal-body">
-                        <div id="chartSection">
-                            <canvas id="myChart"></canvas>
-                            <p id="chartDescription"></p>
+                        <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                            <div id="chartSection">
+                                <canvas id="myChart"></canvas>
+                                <p id="chartDescription"></p>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -138,7 +137,7 @@
         <!-- Modal para Ver Medidas Estadísticas -->
         <div class="modal fade" id="statisticsModal" tabindex="-1" aria-labelledby="statisticsModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog modal-xl"> <!-- Modal ancho para medidas estadísticas -->
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="statisticsModalLabel">Medidas Estadísticas</h5>
@@ -147,43 +146,44 @@
                     <div class="modal-body">
                         <h5>Distribución de Frecuencias:</h5>
                         <div class="row">
-                            <div class="col-md-9">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Límites Indicados</th>
-                                            <th>Límites Reales</th>
-                                            <th>Puntos Medios Xi</th>
-                                            <th>Frecuencia Absoluta Fi</th>
-                                            <th>Frecuencia Relativa</th>
-                                            <th>ACUM "menos de" Absoluta</th>
-                                            <th>ACUM "menos de" Relativa</th>
-                                            <th>ACUM "más de" Absoluta</th>
-                                            <th>ACUM "más de" Relativa</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="statisticsBody">
-                                        <!-- Aquí se insertarán las filas generadas -->
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="3"><strong>TOTAL</strong></td>
-                                            <td id="totalAbsolute"></td>
-                                            <td id="totalRelative"></td>
-                                            <td colspan="4"></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                            <div class="col-12 col-lg-9">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Límites Indicados</th>
+                                                <th>Límites Reales</th>
+                                                <th>Puntos Medios Xi</th>
+                                                <th>Frecuencia Absoluta Fi</th>
+                                                <th>Frecuencia Relativa</th>
+                                                <th>ACUM "menos de" Absoluta</th>
+                                                <th>ACUM "menos de" Relativa</th>
+                                                <th>ACUM "más de" Absoluta</th>
+                                                <th>ACUM "más de" Relativa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="statisticsBody">
+                                            <!-- Aquí se insertarán las filas generadas -->
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3"><strong>TOTAL</strong></td>
+                                                <td id="totalAbsolute"></td>
+                                                <td id="totalRelative"></td>
+                                                <td colspan="4"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-lg-3">
                                 <h5>Medidas Estadísticas</h5>
-                                <p id="mean"></p>
                                 <p id="median"></p>
                                 <p id="mode"></p>
+                                <p id="mean"></p> <!-- Movido debajo de la moda -->
                                 <div id="quartiles"></div>
                                 <div id="percentiles"></div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -191,6 +191,7 @@
         </div>
 
         <!-- Modal para Alertas Pequeñas -->
+        <!-- Mover este modal fuera de otros modales -->
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -208,7 +209,7 @@
             </div>
         </div>
 
-
+        <!-- Scripts -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
         <script>
             let chartInstance;
@@ -216,11 +217,13 @@
             document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('showChartButton').addEventListener('click', showChartModal);
                 document.getElementById('showStatsButton').addEventListener('click', showStatisticsModal);
+                document.getElementById('showTableButton').addEventListener('click', showTableModal);
             });
+
             function addColumn() {
                 const table = document.getElementById('dataTable');
                 for (let row of table.rows) {
-                    const cell = row.insertCell(row.cells.length - 1);
+                    const cell = row.insertCell(row.cells.length - 1); // Antes de controles
                     if (row.rowIndex === 0) {
                         cell.innerHTML = '<input type="text" class="form-control" placeholder="Atributo">';
                     } else {
@@ -231,13 +234,24 @@
                 checkColumnScroll();
             }
 
-            function removeColumn() {
+            function removeColumn(button) {
+                const headerCell = button.closest('th'); // Encuentra el <th> que contiene el botón
+                if (!headerCell) return; // Evita errores si no se encuentra el <th>
+
                 const table = document.getElementById('dataTable');
-                if (table.rows[0].cells.length > 3) {
-                    for (let row of table.rows) {
-                        row.deleteCell(row.cells.length - 2);
+                const headerRow = table.rows[0];
+                const cellIndex = headerCell.cellIndex; // Obtiene el índice de la columna a eliminar
+
+                if (headerRow.cells.length > 3) { // Asegura que siempre queden al menos una columna de datos
+                    // Eliminar la celda de cabecera
+                    headerRow.deleteCell(cellIndex);
+
+                    // Eliminar las celdas correspondientes en el cuerpo de la tabla
+                    for (let i = 1; i < table.rows.length; i++) {
+                        table.rows[i].deleteCell(cellIndex);
                     }
                 }
+
                 updateColumnButtons();
                 checkColumnScroll();
             }
@@ -245,179 +259,380 @@
             function addRow() {
                 const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
                 const newRow = table.insertRow(-1);
-                for (let i = 0; i < table.parentNode.rows[0].cells.length - 1; i++) {
+                for (let i = 0; i < table.parentNode.rows[0].cells.length - 1; i++) { // Excluye la última celda de acciones
+                    const cell = newRow.insertCell(i);
                     if (i === 0) {
-                        newRow.insertCell(i).innerHTML = '<input type="text" class="form-control" placeholder="Eiqueta">';
+                        cell.innerHTML = '<input type="text" class="form-control" placeholder="Etiqueta">';
                     } else {
-                        newRow.insertCell(i).innerHTML = '<input type="text" class="form-control" placeholder="Valor">';
+                        cell.innerHTML = '<input type="number" class="form-control" placeholder="Valor" min="1">';
                     }
                 }
                 const actionCell = newRow.insertCell(table.parentNode.rows[0].cells.length - 1);
-                actionCell.innerHTML = '<div class="table-controls-row"><button class="btn btn-success btn-sm" onclick="addRow()">Añadir Fila</button> <button class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar Fila</button></div>';
+                actionCell.innerHTML = `
+                    <div class="table-controls-row">
+                        <button class="btn btn-success btn-sm" onclick="addRow()">Añadir Fila</button>
+                        <button class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar Fila</button>
+                    </div>
+                `;
                 updateRowButtons();
             }
 
             function removeRow(button) {
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                if (table.rows.length > 1) {
-                    const row = button ? button.parentElement.parentElement.parentElement : table.rows[0];
-                    if (button === undefined && table.rows.length > 1) {
-                        table.deleteRow(0); // Eliminar primera fila si hay más de una
-                    } else {
-                        table.removeChild(row);
-                    }
+                const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                if (tableBody.rows.length > 1) {
+                    const row = button.closest('tr');
+                    tableBody.removeChild(row);
                     updateRowButtons();
                 }
             }
-
 
             function updateRowButtons() {
                 const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
                 const rows = Array.from(table.getElementsByTagName('tr'));
                 rows.forEach(row => {
                     const deleteButton = row.cells[row.cells.length - 1].querySelector('.btn-danger');
-                    deleteButton.disabled = rows.length === 1;
-                    deleteButton.classList.toggle('btn-disabled', rows.length === 1);
+                    if (deleteButton) {
+                        deleteButton.disabled = rows.length === 1;
+                        deleteButton.classList.toggle('btn-disabled', rows.length === 1);
+                    }
                 });
             }
+
             function updateColumnButtons() {
                 const table = document.getElementById('dataTable');
-                const deleteButtons = document.querySelectorAll('.table-controls .btn-danger');
-                deleteButtons.forEach(button => button.disabled = table.rows[0].cells.length <= 3);
+                const deleteButtons = table.querySelectorAll('thead .btn-danger');
+                deleteButtons.forEach(button => {
+                    const headerRow = table.rows[0];
+                    button.disabled = headerRow.cells.length <= 3; // 1 Etiqueta + al menos 1 Atributo + 1 Controles
+                    if (button.disabled) {
+                        button.classList.add('btn-disabled');
+                    } else {
+                        button.classList.remove('btn-disabled');
+                    }
+                });
             }
 
             function checkColumnScroll() {
                 const container = document.querySelector('.table-container');
                 const table = document.getElementById('dataTable');
-                // Mostrar el scroll si hay más de 3 columnas
-                container.style.overflowX = table.rows[0].cells.length > 3 ? "auto" : "hidden";
+                container.style.overflowX = table.rows[0].cells.length > 8 ? "auto" : "hidden"; // Ajusta el número según tus necesidades
             }
 
-            function showChartModal() {
-                const chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
-                const alertModal = new bootstrap.Modal(document.getElementById('alertModal')); // Modal para alertas pequeñas
-                const chartTitle = document.getElementById('chartTitle').value;
-                const chartType = document.querySelector('input[name="chartType"]:checked').value;
+            // Función para mostrar el modal de "Ver Tabla"
+            function showTableModal() {
+                populateTable(); // Llenar la tabla con los datos actuales
+                const tableModal = new bootstrap.Modal(document.getElementById('tableModal'));
+                tableModal.show();
+            }
 
-                // Verificar si es un gráfico de radar y hay menos de 3 columnas
-                const columnCount = document.getElementById('dataTable').rows[0].cells.length - 2; // Ignorar los botones
-                if (chartType === 'radar' && columnCount < 3) {
-                    document.getElementById('alertMessage').innerText = "El gráfico de radar necesita al menos 3 columnas de datos.";
+            // Función para llenar la tabla en el modal incluyendo la columna "Etiqueta"
+            function populateTable() {
+                const mainTable = document.getElementById('dataTable');
+                const modalHeaderRow = document.getElementById('tableHeaderRow');
+                const modalBody = document.getElementById('tableBody');
+
+                // Limpiar contenido existente en el modal
+                modalHeaderRow.innerHTML = '';
+                modalBody.innerHTML = '';
+
+                // Obtener todas las filas de la tabla principal
+                const mainHeaderCells = mainTable.rows[0].cells;
+                const mainBodyRows = mainTable.tBodies[0].rows;
+
+                // Verificar que haya al menos una columna de datos
+                if (mainHeaderCells.length <= 2) { // 1 Etiqueta + al menos 1 Atributo + 1 Controles
+                    document.getElementById('alertMessage').innerText = "Debe haber al menos una columna de datos para visualizar la tabla.";
+                    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
                     alertModal.show();
                     return;
                 }
 
-                // Mostrar el título solo una vez en el encabezado del modal
+                // Crear cabeceras para el modal incluyendo la primera columna "Etiqueta" y excluyendo la última columna "Controles"
+                const modalHeaders = [];
+                for (let i = 0; i < mainHeaderCells.length - 1; i++) { // Incluye la primera (Etiqueta) y excluye la última (Controles)
+                    if (i === 0) {
+                        modalHeaders.push(""); // Título fijo para la primera columna
+                    } else {
+                        const input = mainHeaderCells[i].querySelector('input');
+                        const headerText = input ? input.value.trim() : `Atributo ${i}`;
+                        modalHeaders.push(headerText);
+                    }
+                }
+
+                // Renderizar cabeceras en el modal
+                modalHeaders.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    modalHeaderRow.appendChild(th);
+                });
+
+                // Crear filas de datos para el modal incluyendo la columna "Etiqueta" y excluyendo la última columna "Controles"
+                for (let i = 0; i < mainBodyRows.length; i++) {
+                    const mainRow = mainBodyRows[i];
+                    const modalRow = document.createElement('tr');
+
+                    for (let j = 0; j < mainRow.cells.length - 1; j++) { // Incluye la primera (Etiqueta) y excluye la última (Controles)
+                        const input = mainRow.cells[j].querySelector('input');
+                        const cellValue = input ? input.value.trim() : '';
+                        const td = document.createElement('td');
+                        td.textContent = cellValue;
+                        modalRow.appendChild(td);
+                    }
+
+                    modalBody.appendChild(modalRow);
+                }
+            }
+
+            // Función para descargar la tabla como PNG
+            function downloadTableAsPNG() {
+                const tableSection = document.getElementById('tableSection');
+                html2canvas(tableSection).then(canvas => {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'tabla.png';
+                    link.click();
+                }).catch(error => {
+                    console.error('Error al generar la imagen PNG:', error);
+                    alert('Hubo un error al generar la imagen PNG.');
+                });
+            }
+
+            // Función para descargar la tabla como PDF
+            function downloadTableAsPDF() {
+                const tableSection = document.getElementById('tableSection');
+                html2canvas(tableSection).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'pt', 'a4');
+                    const imgWidth = 595.28; // Ancho en puntos (pt) para A4
+                    const pageHeight = 841.89; // Alto en puntos (pt) para A4
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft > 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    pdf.save('tabla.pdf');
+                }).catch(error => {
+                    console.error('Error al generar el PDF:', error);
+                    alert('Hubo un error al generar el PDF.');
+                });
+            }
+
+            // Función para mostrar el modal de "Ver Gráfica"
+            function showChartModal() {
+                const chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
+                const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+                const chartTitle = document.getElementById('chartTitle').value;
+                const chartType = document.querySelector('input[name="chartType"]:checked').value;
+
+                const table = document.getElementById('dataTable');
+                const headerCells = table.rows[0].cells;
+                const bodyRows = table.tBodies[0].rows;
+
+                // Verificar que no haya celdas vacías en los encabezados (Atributos)
+                let emptyHeaderFound = false;
+                for (let i = 1; i < headerCells.length - 1; i++) { // Excluye "Etiqueta" y "Controles"
+                    const input = headerCells[i].querySelector('input');
+                    if (!input || input.value.trim() === '') {
+                        emptyHeaderFound = true;
+                        break;
+                    }
+                }
+
+                // Verificar que no haya celdas vacías en las filas de datos
+                let emptyCellFound = false;
+                let rowDataCount = 0;
+                for (let i = 0; i < bodyRows.length; i++) {
+                    const row = bodyRows[i];
+                    let hasData = false;
+
+                    for (let j = 0; j < row.cells.length - 1; j++) { // Excluye "Etiqueta" y "Controles"
+                        const input = row.cells[j].querySelector('input');
+                        if (!input || input.value.trim() === '') {
+                            emptyCellFound = true;
+                            break;
+                        }
+                        if (j === 0 && input.value.trim() !== '') { // Verificar "Etiqueta"
+                            hasData = true;
+                        }
+                    }
+
+                    if (emptyCellFound) break;
+                    if (hasData) rowDataCount++;
+                }
+
+                // Si se encontraron celdas vacías, mostrar mensaje y detener la generación de la gráfica
+                if (emptyHeaderFound || emptyCellFound) {
+                    document.getElementById('alertMessage').innerText = "Por favor, completa todos los campos antes de generar la gráfica.";
+                    alertModal.show();
+                    return;
+                }
+
+                // Verificar que haya al menos una columna y tres filas con datos para el gráfico de radar
+                if (chartType === 'radar' && rowDataCount < 3) {
+                    document.getElementById('alertMessage').innerText = "El gráfico de radar necesita al menos 3 filas de datos.";
+                    alertModal.show();
+                    return;
+                }
+
+                // Verificar que haya al menos una columna y una fila con datos para otros tipos de gráficos
+                if (headerCells.length - 2 < 1 || rowDataCount < 1) { // Excluye "Etiqueta" y "Controles"
+                    document.getElementById('alertMessage').innerText = "Por favor, agrega datos suficientes para generar la gráfica.";
+                    alertModal.show();
+                    return;
+                }
+
                 document.getElementById('chartModalLabel').innerText = chartTitle;
 
                 generateChart(chartType);
                 chartModal.show();
             }
 
-
-            function showStatisticsModal() {
-                const statisticsModal = new bootstrap.Modal(document.getElementById('statisticsModal'));
-                const { datasets } = getTableData();
-                const allData = datasets.flatMap(dataset => dataset.data).filter(value => !isNaN(value));
-
-                if (allData.length > 0) {
-                    calculateStatistics(); // Calcula y muestra medidas aritméticas (media, mediana, moda)
-                    const limits = calculateClassLimits(allData, 6); // Ajustar el número de clases según necesites
-                    const frequencies = calculateFrequencies(allData, limits);
-                    displayFrequencyTable(frequencies);
-                }
-
-                statisticsModal.show();
-            }
-
-
-
+            // Función para generar el gráfico
             function generateChart(chartType) {
-                const { labels, datasets, labelData } = getTableData();
-                const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#B28DFF', '#C9CBCF'];
+                const { labels, datasets } = getTableData();
+                const colors = [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                    '#9966FF', '#FF9F40', '#B28DFF', '#C9CBCF',
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                ];
 
                 if (chartInstance) {
                     chartInstance.destroy();
                 }
 
                 const ctx = document.getElementById('myChart').getContext('2d');
-                const canvas = document.getElementById('myChart');
 
-                // Ajustar el tamaño del canvas para hacer la gráfica más grande solo para radar
-                if (chartType === 'radar') {
-                    canvas.style.width = "800px";  // Aumentar el ancho
-                    canvas.style.height = "800px"; // Aumentar la altura
-                } else {
-                    canvas.style.width = "100%";
-                    canvas.style.height = "400px";
-                }
+                let chartConfig;
 
-                let chartConfig = {
-                    type: chartType === 'horizontalBar' ? 'bar' : chartType,
-                    data: {
-                        labels: labels,
-                        datasets: datasets.map((ds, index) => ({
-                            label: ds.label,
-                            data: ds.data,
-                            backgroundColor: chartType === 'radar' ? `${colors[index % colors.length]}33` : colors[index % colors.length],
-                            borderColor: colors[index % colors.length],
-                            borderWidth: chartType === 'radar' ? 2 : 1,
-                            pointBackgroundColor: colors[index % colors.length],
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: colors[index % colors.length],
-                            fill: chartType === 'radar'
-                        }))
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: chartType === 'horizontalBar' ? 'y' : 'x',
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: {
-                                display: false
-                            },
-                            datalabels: {
-                                anchor: 'center',
-                                align: 'center',
-                                formatter: (value) => value.toFixed(2),
-                                color: '#fff',
-                                font: {
-                                    weight: 'bold'
-                                },
-                                clamp: true,
-                                clip: false
+                if (chartType === 'pie') {
+                    // Configuración para gráfico de pastel
+                    const averages = labels.map((label, index) => {
+                        const dataPerLabel = datasets.map(ds => ds.data[index]).filter(value => !isNaN(value));
+                        const sum = dataPerLabel.reduce((a, b) => a + b, 0);
+                        const avg = dataPerLabel.length > 0 ? sum / dataPerLabel.length : 0;
+                        return avg;
+                    });
+
+                    chartConfig = {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: averages,
+                                backgroundColor: colors.slice(0, averages.length),
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: false },
+                                datalabels: {
+                                    formatter: (value) => value.toFixed(2),
+                                    color: '#000',
+                                    font: { weight: 'bold' }
+                                }
                             }
                         },
-                        scales: chartType === 'pie' ? {} : {
-                            x: { beginAtZero: true },
-                            y: { beginAtZero: true }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                };
+                        plugins: [ChartDataLabels]
+                    };
+                } else if (chartType === 'radar') {
+                    // Configuración para gráfico de radar
+                    const adjustedLabels = datasets.map(ds => ds.label);
 
-                // Configuración específica para gráficos de radar
-                if (chartType === 'radar') {
-                    chartConfig.options.scales = {
-                        r: {
-                            beginAtZero: true,
-                            suggestedMin: 0,
-                            suggestedMax: Math.max(...datasets.flatMap(ds => ds.data)) + 5,
-                            grid: { color: 'rgba(0,0,0,0.1)' },
-                            angleLines: { color: 'rgba(0,0,0,0.3)' },
-                            ticks: {
-                                stepSize: 1,
-                                backdropColor: 'rgba(255, 255, 255, 0)',
-                                display: true,
-                                z: 1
+                    const adjustedDatasets = labels.map((label, index) => ({
+                        label: label,
+                        data: datasets.map(ds => ds.data[index]),
+                        backgroundColor: `${colors[index % colors.length]}33`,
+                        borderColor: colors[index % colors.length],
+                        borderWidth: 2,
+                        fill: true
+                    }));
+
+                    chartConfig = {
+                        type: 'radar',
+                        data: {
+                            labels: adjustedLabels,
+                            datasets: adjustedDatasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        circular: true
+                                    }
+                                }
                             },
-                            pointLabels: {
-                                font: { size: 14 },
-                                color: '#333'
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: false },
+                                datalabels: {
+                                    formatter: (value) => value.toFixed(2),
+                                    color: '#000',
+                                    font: { weight: 'bold' }
+                                }
                             }
-                        }
+                        },
+                        plugins: [ChartDataLabels]
+                    };
+                } else {
+                    // Configuración para gráficos de barras, líneas, etc.
+                    const adjustedDatasets = datasets.map((ds, index) => ({
+                        label: ds.label,
+                        data: ds.data,
+                        backgroundColor: colors[index % colors.length],
+                        borderColor: colors[index % colors.length],
+                        borderWidth: chartType === 'line' ? 2 : 1,
+                        fill: chartType !== 'line',
+                    }));
+
+                    const hideDataLabels = chartType === 'line';
+
+                    chartConfig = {
+                        type: chartType === 'horizontalBar' ? 'bar' : chartType,
+                        data: {
+                            labels: labels,
+                            datasets: adjustedDatasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: chartType === 'horizontalBar' ? 'y' : 'x',
+                            scales: {
+                                [chartType === 'horizontalBar' ? 'y' : 'x']: {
+                                    beginAtZero: true
+                                },
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: false },
+                                datalabels: hideDataLabels ? false : {
+                                    formatter: (value) => value.toFixed(2),
+                                    color: '#000',
+                                    font: { weight: 'bold' }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
                     };
                 }
 
@@ -425,69 +640,16 @@
                 document.getElementById('chartDescription').innerText = document.getElementById('chartDesc').value;
             }
 
-            function calculateFrequencyDistribution(data) {
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min;
-                const classCount = Math.ceil(1 + 3.3 * Math.log10(data.length)); // Número de clases usando la regla de Sturges
-                const classWidth = Math.ceil(range / classCount);
-
-                let frequencies = [];
-                let lowerBound = min;
-
-                for (let i = 0; i < classCount; i++) {
-                    let upperBound = lowerBound + classWidth - 1;
-                    let count = data.filter(value => value >= lowerBound && value <= upperBound).length;
-
-                    frequencies.push({
-                        range: `${lowerBound} - ${upperBound}`,
-                        count: count,
-                        midpoint: ((lowerBound + upperBound) / 2).toFixed(2),
-                        relativeFrequency: ((count / data.length) * 100).toFixed(2) + "%"
-                    });
-
-                    lowerBound = upperBound + 1;
-                }
-
-                displayFrequencyTable(frequencies);
-            }
-
-
-            function displayFrequencyTable(frequencies) {
-                const tableBody = document.getElementById('statisticsBody');
-                tableBody.innerHTML = '';
-
-                frequencies.forEach(freq => {
-                    const row = `
-            <tr>
-                <td>${freq.indicatedLimits}</td>
-                <td>${freq.realLimits}</td>
-                <td>${freq.midPoint}</td>
-                <td>${freq.absolute}</td>
-                <td>${freq.relative}</td>
-                <td>${freq.cumulativeLess}</td>
-                <td>${((freq.cumulativeLess / frequencies.length) * 100).toFixed(2)}%</td>
-                <td>${freq.cumulativeMore}</td>
-                <td>${((freq.cumulativeMore / frequencies.length) * 100).toFixed(2)}%</td>
-            </tr>`;
-                    tableBody.innerHTML += row;
-                });
-
-                // Calcular y mostrar los totales
-                document.getElementById('totalAbsolute').textContent = frequencies.reduce((sum, item) => sum + item.absolute, 0);
-                document.getElementById('totalRelative').textContent = frequencies.reduce((sum, item) => sum + parseFloat(item.relative), 0).toFixed(2) + "%";
-            }
-
-
+            // Función para obtener los datos de la tabla
             function getTableData() {
                 const table = document.getElementById('dataTable');
                 const labels = [];
                 const datasets = [];
 
-                // Obtener etiquetas de columnas (header)
-                for (let i = 1; i < table.rows[0].cells.length - 1; i++) {
+                // Obtener etiquetas de columnas (cabecera)
+                for (let i = 1; i < table.rows[0].cells.length - 1; i++) { // Excluye "Etiqueta" y "Controles"
                     const labelInput = table.rows[0].cells[i].getElementsByTagName('input')[0];
-                    const label = labelInput ? labelInput.value : '';
+                    const label = labelInput ? labelInput.value.trim() : `Atributo ${i}`;
                     labels.push(label);
                 }
 
@@ -495,9 +657,9 @@
                 for (let i = 0; i < table.tBodies[0].rows.length; i++) {
                     const row = table.tBodies[0].rows[i];
                     const attributeInput = row.cells[0].getElementsByTagName('input')[0];
-                    const attributeName = attributeInput ? attributeInput.value : '';
+                    const attributeName = attributeInput ? attributeInput.value.trim() : `Fila ${i + 1}`;
                     const data = [];
-                    for (let j = 1; j < row.cells.length - 1; j++) {
+                    for (let j = 1; j < row.cells.length - 1; j++) { // Excluye "Etiqueta" y "Controles"
                         const valueInput = row.cells[j].getElementsByTagName('input')[0];
                         const value = valueInput ? parseFloat(valueInput.value) : NaN;
                         data.push(value);
@@ -509,22 +671,23 @@
                     });
                 }
 
-                // Recolectar datos por etiqueta (columna)
-                const labelData = labels.map((label, index) => {
-                    const dataPerLabel = [];
-                    for (let i = 0; i < datasets.length; i++) {
-                        const value = datasets[i].data[index];
-                        if (!isNaN(value)) {
-                            dataPerLabel.push(value);
-                        }
-                    }
-                    return {
-                        label: label,
-                        data: dataPerLabel
-                    };
-                });
+                return { labels, datasets };
+            }
 
-                return { labels, datasets, labelData };
+            // Funciones para calcular y mostrar estadísticas
+            function showStatisticsModal() {
+                const statisticsModal = new bootstrap.Modal(document.getElementById('statisticsModal'));
+                const { datasets } = getTableData();
+                const allData = datasets.flatMap(dataset => dataset.data).filter(value => !isNaN(value));
+
+                if (allData.length > 0) {
+                    calculateStatistics();
+                    const limits = calculateClassLimits(allData, 6);
+                    const frequencies = calculateFrequencies(allData, limits);
+                    displayFrequencyTable(frequencies);
+                }
+
+                statisticsModal.show();
             }
 
             function calculateStatistics() {
@@ -544,20 +707,20 @@
                 const percentiles = calculatePercentiles(allData);
 
                 // Mostrar los resultados
-                document.getElementById('mean').innerText = `Media: ${mean}`;
                 document.getElementById('median').innerText = `Mediana: ${median}`;
                 document.getElementById('mode').innerText = mode;
+                document.getElementById('mean').innerText = `Media Aritmética: ${mean}`; // Agregado debajo de la moda
                 document.getElementById('quartiles').innerHTML = `
-        <strong>Cuartiles:</strong><br>
-        Q1: ${quartiles.Q1}<br>
-        Q2 (Mediana): ${quartiles.Q2}<br>
-        Q3: ${quartiles.Q3}
-    `;
+            <strong>Cuartiles:</strong><br>
+            Q1: ${quartiles.Q1}<br>
+            Q2 (Mediana): ${quartiles.Q2}<br>
+            Q3: ${quartiles.Q3}
+        `;
                 document.getElementById('percentiles').innerHTML = `
-        <strong>Percentil 25:</strong> ${percentiles.P25}<br>
-        <strong>Percentil 50 (Mediana):</strong> ${percentiles.P50}<br>
-        <strong>Percentil 75:</strong> ${percentiles.P75}
-    `;
+            <strong>Percentil 25:</strong> ${percentiles.P25}<br>
+            <strong>Percentil 50 (Mediana):</strong> ${percentiles.P50}<br>
+            <strong>Percentil 75:</strong> ${percentiles.P75}
+        `;
             }
 
             function calculateMode(data) {
@@ -644,7 +807,6 @@
                 return limits;
             }
 
-
             function calculateFrequencies(data, limits) {
                 let freqArray = limits.map(limit => ({
                     indicatedLimits: limit.indicated,
@@ -675,42 +837,33 @@
 
                 return freqArray;
             }
-            //EXCEL
-            function importExcel() {
-                // Dispara el input de archivo para Excel
-                document.getElementById('excelInput').click();
+
+            function displayFrequencyTable(frequencies) {
+                const tableBody = document.getElementById('statisticsBody');
+                tableBody.innerHTML = '';
+
+                frequencies.forEach(freq => {
+                    const row = `
+            <tr>
+                <td>${freq.indicatedLimits}</td>
+                <td>${freq.realLimits}</td>
+                <td>${freq.midPoint}</td>
+                <td>${freq.absolute}</td>
+                <td>${freq.relative}</td>
+                <td>${freq.cumulativeLess}</td>
+                <td>${((freq.cumulativeLess / frequencies.length) * 100).toFixed(2)}%</td>
+                <td>${freq.cumulativeMore}</td>
+                <td>${((freq.cumulativeMore / frequencies.length) * 100).toFixed(2)}%</td>
+            </tr>`;
+                    tableBody.innerHTML += row;
+                });
+
+                // Calcular y mostrar los totales
+                document.getElementById('totalAbsolute').textContent = frequencies.reduce((sum, item) => sum + item.absolute, 0);
+                document.getElementById('totalRelative').textContent = frequencies.reduce((sum, item) => sum + parseFloat(item.relative), 0).toFixed(2) + "%";
             }
 
-            function handleFileUpload(event, type) {
-                const file = event.target.files[0];
-                if (file && type === 'excel') {
-                    // Mostrar el nombre del archivo en el campo de texto
-                    document.getElementById('fileNameDisplay').value = file.name;
-                    // Lógica para manejar el archivo Excel
-                    readExcel(file);
-                }
-            }
-
-            function readExcel(file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-                    console.log(excelData);
-                    alert("Archivo Excel cargado exitosamente.");
-                    // Ahora puedes usar los datos y generar la gráfica
-                };
-                reader.readAsArrayBuffer(file);
-            }
-
-            // Cargar la librería de Excel JS
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>');
-
-            //descargar grafica como pdf o png
+            // Funciones para descargar la gráfica como PDF
             async function downloadChartAsPDF() {
                 const { jsPDF } = window.jspdf;
                 const canvas = document.getElementById('myChart');
@@ -730,6 +883,7 @@
                 pdf.save('grafica.pdf');
             }
 
+            // Función para descargar la gráfica como PNG
             function downloadChartAsPNG() {
                 const canvas = document.getElementById('myChart');
                 const link = document.createElement('a');
@@ -737,78 +891,6 @@
                 link.download = 'grafica.png';
                 link.click();
             }
-
-            // Incluir la librería jsPDF
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
-
-            //model de ver tabla
-            document.addEventListener('DOMContentLoaded', function () {
-                document.getElementById('showChartButton').addEventListener('click', showChartModal);
-                document.getElementById('showTableButton').addEventListener('click', showTableModal);
-            });
-
-            function showTableModal() {
-                const tableModal = new bootstrap.Modal(document.getElementById('tableModal'));
-                populateTable(); // Llenar la tabla con los datos actuales
-                tableModal.show();
-            }
-
-            function populateTable() {
-                const table = document.getElementById('dataTable');
-                const tableHeaderRow = document.getElementById('tableHeaderRow');
-                const tableBody = document.getElementById('tableBody');
-
-                // Limpiar filas existentes
-                tableHeaderRow.innerHTML = '';
-                tableBody.innerHTML = '';
-
-                // Crear cabeceras de la tabla basadas en la tabla original
-                const headers = Array.from(table.rows[0].cells);
-                const headerHTML = headers.slice(1, -1).map(header => {
-                    const input = header.querySelector('input');
-                    return `<th>${input ? input.value : ''}</th>`;
-                }).join('');
-                tableHeaderRow.innerHTML = `<th>Etiqueta</th>${headerHTML}`;
-
-                // Crear filas de la tabla basadas en la tabla original
-                const rows = Array.from(table.tBodies[0].rows);
-                rows.forEach(row => {
-                    const labelCell = row.cells[0].querySelector('input').value;
-                    const dataCells = Array.from(row.cells).slice(1, -1).map(cell => {
-                        const input = cell.querySelector('input');
-                        return `<td>${input ? input.value : ''}</td>`;
-                    }).join('');
-                    const rowHTML = `<tr><td>${labelCell}</td>${dataCells}</tr>`;
-                    tableBody.innerHTML += rowHTML;
-                });
-            }
-
-            function downloadTableAsPNG() {
-                const tableSection = document.getElementById('tableSection');
-                html2canvas(tableSection).then(canvas => {
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'tabla.png';
-                    link.click();
-                });
-            }
-
-            function downloadTableAsPDF() {
-                const tableSection = document.getElementById('tableSection');
-                html2canvas(tableSection).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0); // Ajustar la imagen dentro del PDF
-                    pdf.save('tabla.pdf');
-                });
-            }
-
-            // Asegúrate de incluir la librería html2canvas para capturar la tabla en una imagen
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"><\/script>');
-            // Incluir la librería jsPDF
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
-
-        </script>
         </script>
     </div>
 </body>
