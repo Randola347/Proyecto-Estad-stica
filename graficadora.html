@@ -2,897 +2,1371 @@
 <html>
 
 <head>
-    <title>Herramienta Graficadora Estadística</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-    <!-- Cargar Chart.js v3.x -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Cargar el plugin para etiquetas de datos -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <!-- Librería html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Librería jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <title>Herramienta Graficadora Estadística</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" />
+  <!-- Cargar Chart.js v3.x -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Cargar el plugin para etiquetas de datos -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <!-- Librería html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Librería jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Herramienta Graficadora Estadística</h2>
-        <div class="mb-3">
-            <label for="chartTitle" class="form-label">Título del Gráfico</label>
-            <input type="text" class="form-control" id="chartTitle" placeholder="Añade un título a tu gráfico">
-        </div>
-        <div class="mb-3">
-            <label for="chartDesc" class="form-label">Descripción del Gráfico</label>
-            <input type="text" class="form-control" id="chartDesc" placeholder="Añade una descripción a tu gráfico">
-        </div>
+  <div class="container mt-5">
+    <button class="btn btn-secondary" id="userGuideButton">
+      <img src="imagen/icon_User_Manual.ico" alt="Guía de Usuario"
+        style="width: 20px; height: 20px; margin-right: 5px" />
+    </button>
+    <h2 class="text-center">Herramienta Graficadora Estadística</h2>
+    <div class="mb-3">
+      <label for="chartTitle" class="form-label">Título del Gráfico</label>
+      <input type="text" class="form-control" id="chartTitle" placeholder="Añade un título a tu gráfico" />
+    </div>
+    <div class="mb-3">
+      <label for="chartDesc" class="form-label">Descripción del Gráfico</label>
+      <input type="text" class="form-control" id="chartDesc" placeholder="Añade una descripción a tu gráfico" />
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Tipos de Gráfico</label><br>
-            <input type="radio" name="chartType" value="bar" checked> Barras
-            <input type="radio" name="chartType" value="line"> Líneas
-            <input type="radio" name="chartType" value="pie"> Circular
-            <input type="radio" name="chartType" value="radar"> Radar
-            <input type="radio" name="chartType" value="horizontalBar"> Barras Horizontales
-        </div>
+    <div class="mb-3">
+      <label class="form-label">Tipos de Gráfico</label><br />
+      <input type="radio" name="chartType" value="bar" checked /> Barras
+      <input type="radio" name="chartType" value="line" /> Líneas
+      <input type="radio" name="chartType" value="pie" /> Circular
+      <input type="radio" name="chartType" value="radar" /> Radar
+      <input type="radio" name="chartType" value="horizontalBar" /> Barras
+      Horizontales
+    </div>
 
-        <h4>Datos Del Gráfico</h4>
-        <div class="table-container">
-            <table id="dataTable" class="table">
+    <h4>Datos Del Gráfico</h4>
+    <div class="table-container">
+      <table id="dataTable" class="table">
+        <thead>
+          <tr>
+            <!-- Cambiado de <th></th> a <th>Etiqueta</th> -->
+            <th></th>
+            <th>
+              <input type="text" class="form-control" placeholder="Atributo" />
+            </th>
+            <th>
+              <input type="text" class="form-control" placeholder="Atributo" />
+            </th>
+            <th class="table-controls">
+              <button class="btn btn-success btn-sm" onclick="addColumn()">
+                Agregar Columna
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="removeColumn(this)">
+                Eliminar Columna
+              </button>
+              <!-- Pasar 'this' como parámetro para identificar la columna a eliminar -->
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <input type="text" class="form-control" placeholder="Etiqueta" />
+            </td>
+            <td>
+              <input type="number" class="form-control" placeholder="Valor" min="1" />
+            </td>
+            <td>
+              <input type="number" class="form-control" placeholder="Valor" min="1" />
+            </td>
+            <td class="table-controls-row">
+              <button class="btn btn-success btn-sm" onclick="addRow()">
+                Añadir Fila
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                Eliminar Fila
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-controls">
+      <button class="btn btn-secondary" id="showTableButton">
+        Ver Tabla
+      </button>
+      <button class="btn btn-primary" id="showChartButton">
+        Ver Gráfica
+      </button>
+      <button class="btn btn-secondary" id="showStatsButton">
+        Ver Medidas Estadísticas
+      </button>
+    </div>
+
+    <!-- Modal para Ver Tabla -->
+    <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tableModalLabel">
+              Datos de la Tabla
+            </h5>
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+              Volver
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="tableSection">
+              <table class="table table-bordered">
                 <thead>
-                    <tr>
-                        <!-- Cambiado de <th></th> a <th>Etiqueta</th> -->
-                        <th></th>
-                        <th><input type="text" class="form-control" placeholder="Atributo"></th>
-                        <th><input type="text" class="form-control" placeholder="Atributo"></th>
-                        <th class="table-controls">
-                            <button class="btn btn-success btn-sm" onclick="addColumn()">Agregar Columna</button>
-                            <button class="btn btn-danger btn-sm" onclick="removeColumn(this)">Eliminar Columna</button>
-                            <!-- Pasar 'this' como parámetro para identificar la columna a eliminar -->
-                        </th>
-                    </tr>
+                  <tr id="tableHeaderRow">
+                    <!-- Aquí se llenarán las cabeceras de la tabla -->
+                  </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" class="form-control" placeholder="Etiqueta"></td>
-                        <td><input type="number" class="form-control" placeholder="Valor" min="1"></td>
-                        <td><input type="number" class="form-control" placeholder="Valor" min="1"></td>
-                        <td class="table-controls-row">
-                            <button class="btn btn-success btn-sm" onclick="addRow()">Añadir Fila</button>
-                            <button class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar Fila</button>
-                        </td>
-                    </tr>
+                <tbody id="tableBody">
+                  <!-- Aquí se llenarán los datos de la tabla -->
                 </tbody>
-            </table>
-        </div>
-        <div class="table-controls">
-            <button class="btn btn-secondary" id="showTableButton">Ver Tabla</button>
-            <button class="btn btn-primary" id="showChartButton">Ver Gráfica</button>
-            <button class="btn btn-secondary" id="showStatsButton">Ver Medidas Estadísticas</button>
-        </div>
-
-        <!-- Modal para Ver Tabla -->
-        <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="tableModalLabel">Datos de la Tabla</h5>
-                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Volver</button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="tableSection">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr id="tableHeaderRow">
-                                        <!-- Aquí se llenarán las cabeceras de la tabla -->
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody">
-                                    <!-- Aquí se llenarán los datos de la tabla -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="d-flex justify-content-start">
-                            <button class="btn btn-danger me-2" onclick="downloadTableAsPDF()">Descargar como
-                                PDF</button>
-                            <button class="btn btn-info" onclick="downloadTableAsPNG()">Descargar como PNG</button>
-                        </div>
-                    </div>
-                </div>
+              </table>
             </div>
-        </div>
-
-
-        <!-- Modal para Ver Gráficas -->
-        <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="chartModalLabel"></h5>
-                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Volver</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
-                            <div id="chartSection">
-                                <canvas id="myChart"></canvas>
-                                <p id="chartDescription"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="d-flex justify-content-start">
-                            <button class="btn btn-danger me-2" onclick="downloadChartAsPDF()">Descargar como
-                                PDF</button>
-                            <button class="btn btn-info" onclick="downloadChartAsPNG()">Descargar como PNG</button>
-                        </div>
-                    </div>
-                </div>
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-start">
+              <button class="btn btn-danger me-2" onclick="downloadTableAsPDF()">
+                Descargar como PDF
+              </button>
+              <button class="btn btn-info" onclick="downloadTableAsPNG()">
+                Descargar como PNG
+              </button>
             </div>
+          </div>
         </div>
-
-
-        <!-- Modal para Ver Medidas Estadísticas -->
-        <div class="modal fade" id="statisticsModal" tabindex="-1" aria-labelledby="statisticsModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="statisticsModalLabel">Medidas Estadísticas</h5>
-                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Volver</button>
-                    </div>
-                    <div class="modal-body">
-                        <h5>Distribución de Frecuencias:</h5>
-                        <div class="row">
-                            <div class="col-12 col-lg-9">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Límites Indicados</th>
-                                                <th>Límites Reales</th>
-                                                <th>Puntos Medios Xi</th>
-                                                <th>Frecuencia Absoluta Fi</th>
-                                                <th>Frecuencia Relativa</th>
-                                                <th>ACUM "menos de" Absoluta</th>
-                                                <th>ACUM "menos de" Relativa</th>
-                                                <th>ACUM "más de" Absoluta</th>
-                                                <th>ACUM "más de" Relativa</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="statisticsBody">
-                                            <!-- Aquí se insertarán las filas generadas -->
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="3"><strong>TOTAL</strong></td>
-                                                <td id="totalAbsolute"></td>
-                                                <td id="totalRelative"></td>
-                                                <td colspan="4"></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <h5>Medidas Estadísticas</h5>
-                                <p id="median"></p>
-                                <p id="mode"></p>
-                                <p id="mean"></p> <!-- Movido debajo de la moda -->
-                                <div id="quartiles"></div>
-                                <div id="percentiles"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      </div>
+    </div>
+    <!-- Modal de Bienvenida para la Guía de Uso -->
+    <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="welcomeModalLabel">Guía de Uso</h5>
+          </div>
+          <div class="modal-body">
+            <div id="readmeContent">
+              <!-- Aquí se cargará el contenido del Readme.md -->
             </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="acceptButton">
+              Aceptar
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Modal para Alertas Pequeñas -->
-        <!-- Mover este modal fuera de otros modales -->
-        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="alertModalLabel">Alerta</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="alertMessage"></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
+    <!-- Modal para Ver Gráficas -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="chartModalLabel"></h5>
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+              Volver
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto">
+              <div id="chartSection">
+                <canvas id="myChart"></canvas>
+                <p id="chartDescription"></p>
+              </div>
             </div>
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-start">
+              <button class="btn btn-danger me-2" onclick="downloadChartAsPDF()">
+                Descargar como PDF
+              </button>
+              <button class="btn btn-info" onclick="downloadChartAsPNG()">
+                Descargar como PNG
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Scripts -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-        <script>
-            let chartInstance;
+    <!-- Modal para Ver Medidas Estadísticas -->
+    <div class="modal fade" id="statisticsModal" tabindex="-1" aria-labelledby="statisticsModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statisticsModalLabel">
+              Medidas Estadísticas
+            </h5>
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+              Volver
+            </button>
+          </div>
+          <div class="modal-body">
+            <h5>Distribución de Frecuencias:</h5>
+            <div class="row">
+              <div class="col-12 col-lg-9">
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Límites Indicados</th>
+                        <th>Límites Reales</th>
+                        <th>Puntos Medios Xi</th>
+                        <th>Frecuencia Absoluta Fi</th>
+                        <th>Frecuencia Relativa</th>
+                        <th>ACUM "menos de" Absoluta</th>
+                        <th>ACUM "menos de" Relativa</th>
+                        <th>ACUM "más de" Absoluta</th>
+                        <th>ACUM "más de" Relativa</th>
+                      </tr>
+                    </thead>
+                    <tbody id="statisticsBody">
+                      <!-- Aquí se insertarán las filas generadas -->
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="3"><strong>TOTAL</strong></td>
+                        <td id="totalAbsolute"></td>
+                        <td id="totalRelative"></td>
+                        <td colspan="4"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+              <div class="col-12 col-lg-3">
+                <h5>Medidas Estadísticas</h5>
+                <p id="median"></p>
+                <p id="mode"></p>
+                <p id="mean"></p>
+                <!-- Movido debajo de la moda -->
+                <div id="quartiles"></div>
+                <div id="percentiles"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            document.addEventListener('DOMContentLoaded', function () {
-                document.getElementById('showChartButton').addEventListener('click', showChartModal);
-                document.getElementById('showStatsButton').addEventListener('click', showStatisticsModal);
-                document.getElementById('showTableButton').addEventListener('click', showTableModal);
-            });
+    <!-- Modal para Alertas Pequeñas -->
+    <!-- Mover este modal fuera de otros modales -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="alertModalLabel">Alerta</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="alertMessage"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            function addColumn() {
-                const table = document.getElementById('dataTable');
-                for (let row of table.rows) {
-                    const cell = row.insertCell(row.cells.length - 1); // Antes de controles
-                    if (row.rowIndex === 0) {
-                        cell.innerHTML = '<input type="text" class="form-control" placeholder="Atributo">';
-                    } else {
-                        cell.innerHTML = '<input type="text" class="form-control" placeholder="Valor">';
-                    }
-                }
-                updateColumnButtons();
-                checkColumnScroll();
-            }
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+      let chartInstance;
 
-            function removeColumn(button) {
-                const headerCell = button.closest('th'); // Encuentra el <th> que contiene el botón
-                if (!headerCell) return; // Evita errores si no se encuentra el <th>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("showChartButton")
+          .addEventListener("click", showChartModal);
+        document
+          .getElementById("showStatsButton")
+          .addEventListener("click", showStatisticsModal);
+        document
+          .getElementById("showTableButton")
+          .addEventListener("click", showTableModal);
+      });
 
-                const table = document.getElementById('dataTable');
-                const headerRow = table.rows[0];
-                const cellIndex = headerCell.cellIndex; // Obtiene el índice de la columna a eliminar
+      function addColumn() {
+        const table = document.getElementById("dataTable");
+        for (let row of table.rows) {
+          const cell = row.insertCell(row.cells.length - 1); // Antes de controles
+          if (row.rowIndex === 0) {
+            cell.innerHTML =
+              '<input type="text" class="form-control" placeholder="Atributo">';
+          } else {
+            cell.innerHTML =
+              '<input type="text" class="form-control" placeholder="Valor">';
+          }
+        }
+        updateColumnButtons();
+        checkColumnScroll();
+      }
 
-                if (headerRow.cells.length > 3) { // Asegura que siempre queden al menos una columna de datos
-                    // Eliminar la celda de cabecera
-                    headerRow.deleteCell(cellIndex);
+      function removeColumn(button) {
+        const table = document.getElementById("dataTable");
+        const headerRow = table.rows[0];
+        const totalColumns = headerRow.cells.length;
 
-                    // Eliminar las celdas correspondientes en el cuerpo de la tabla
-                    for (let i = 1; i < table.rows.length; i++) {
-                        table.rows[i].deleteCell(cellIndex);
-                    }
-                }
+        // Índice de la columna a eliminar (segunda última columna)
+        const columnToDelete = totalColumns - 2; // -1 para la última columna (controles), -2 para la segunda última
 
-                updateColumnButtons();
-                checkColumnScroll();
-            }
+        if (totalColumns > 3) {
+          // 1 Etiqueta + al menos 1 Atributo + 1 Controles
+          // Eliminar la celda de cabecera
+          headerRow.deleteCell(columnToDelete);
 
-            function addRow() {
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                const newRow = table.insertRow(-1);
-                for (let i = 0; i < table.parentNode.rows[0].cells.length - 1; i++) { // Excluye la última celda de acciones
-                    const cell = newRow.insertCell(i);
-                    if (i === 0) {
-                        cell.innerHTML = '<input type="text" class="form-control" placeholder="Etiqueta">';
-                    } else {
-                        cell.innerHTML = '<input type="number" class="form-control" placeholder="Valor" min="1">';
-                    }
-                }
-                const actionCell = newRow.insertCell(table.parentNode.rows[0].cells.length - 1);
-                actionCell.innerHTML = `
+          // Eliminar las celdas correspondientes en el cuerpo de la tabla
+          for (let i = 1; i < table.rows.length; i++) {
+            table.rows[i].deleteCell(columnToDelete);
+          }
+        }
+
+        updateColumnButtons();
+        checkColumnScroll();
+      }
+
+      function addRow() {
+        const table = document
+          .getElementById("dataTable")
+          .getElementsByTagName("tbody")[0];
+        const newRow = table.insertRow(-1);
+        for (let i = 0; i < table.parentNode.rows[0].cells.length - 1; i++) {
+          // Excluye la última celda de acciones
+          const cell = newRow.insertCell(i);
+          if (i === 0) {
+            cell.innerHTML =
+              '<input type="text" class="form-control" placeholder="Etiqueta">';
+          } else {
+            cell.innerHTML =
+              '<input type="number" class="form-control" placeholder="Valor" min="1">';
+          }
+        }
+        const actionCell = newRow.insertCell(
+          table.parentNode.rows[0].cells.length - 1
+        );
+        actionCell.innerHTML = `
                     <div class="table-controls-row">
                         <button class="btn btn-success btn-sm" onclick="addRow()">Añadir Fila</button>
                         <button class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar Fila</button>
                     </div>
                 `;
-                updateRowButtons();
+        updateRowButtons();
+      }
+
+      function removeRow(button) {
+        const tableBody = document
+          .getElementById("dataTable")
+          .getElementsByTagName("tbody")[0];
+        if (tableBody.rows.length > 1) {
+          const row = button.closest("tr");
+          tableBody.removeChild(row);
+          updateRowButtons();
+        }
+      }
+
+      function updateRowButtons() {
+        const table = document
+          .getElementById("dataTable")
+          .getElementsByTagName("tbody")[0];
+        const rows = Array.from(table.getElementsByTagName("tr"));
+        rows.forEach((row) => {
+          const deleteButton =
+            row.cells[row.cells.length - 1].querySelector(".btn-danger");
+          if (deleteButton) {
+            deleteButton.disabled = rows.length === 1;
+            deleteButton.classList.toggle("btn-disabled", rows.length === 1);
+          }
+        });
+      }
+
+      function updateColumnButtons() {
+        const table = document.getElementById("dataTable");
+        const deleteButtons = table.querySelectorAll("thead .btn-danger");
+        deleteButtons.forEach((button) => {
+          const headerRow = table.rows[0];
+          button.disabled = headerRow.cells.length <= 3; // 1 Etiqueta + al menos 1 Atributo + 1 Controles
+          if (button.disabled) {
+            button.classList.add("btn-disabled");
+          } else {
+            button.classList.remove("btn-disabled");
+          }
+        });
+      }
+
+      function checkColumnScroll() {
+        const container = document.querySelector(".table-container");
+        const table = document.getElementById("dataTable");
+        container.style.overflowX =
+          table.rows[0].cells.length > 8 ? "auto" : "hidden"; // Ajusta el número según tus necesidades
+      }
+
+      // Función general para mostrar modales de tabla o estadísticas
+      function showModal(type) {
+        // Verificar si todos los campos de la tabla están completos
+        if (!isTableFilled()) {
+          document.getElementById("alertMessage").innerText =
+            "Por favor, completa todos los campos antes de continuar.";
+          const alertModal = new bootstrap.Modal(document.getElementById("alertModal"));
+          alertModal.show();
+          return; // Salir de la función si faltan datos, evitando abrir cualquier otro modal
+        }
+
+        // Solo se llega aquí si todos los datos están completos
+        if (type === 'table') {
+          populateTable(); // Llenar la tabla con los datos actuales
+          const tableModal = new bootstrap.Modal(document.getElementById("tableModal"));
+          tableModal.show();
+        } else if (type === 'statistics') {
+          calculateStatistics(); // Calcular y mostrar las medidas estadísticas
+          const statisticsModal = new bootstrap.Modal(document.getElementById("statisticsModal"));
+          statisticsModal.show();
+        }
+      }
+
+      document.addEventListener('hidden.bs.modal', function (event) {
+        // Remover cualquier backdrop si sigue presente
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+          backdrop.remove();
+        }
+      });
+
+      // Event listeners para los botones de la tabla y estadísticas
+      document.getElementById("showTableButton").addEventListener("click", () => showModal('table'));
+      document.getElementById("showStatsButton").addEventListener("click", () => showModal('statistics'));
+
+
+      // Función para llenar la tabla en el modal incluyendo la columna "Etiqueta"
+      function populateTable() {
+        const mainTable = document.getElementById("dataTable");
+        const modalHeaderRow = document.getElementById("tableHeaderRow");
+        const modalBody = document.getElementById("tableBody");
+
+        // Limpiar contenido existente en el modal
+        modalHeaderRow.innerHTML = "";
+        modalBody.innerHTML = "";
+
+        // Obtener todas las filas de la tabla principal
+        const mainHeaderCells = mainTable.rows[0].cells;
+        const mainBodyRows = mainTable.tBodies[0].rows;
+
+        // Verificar que haya al menos una columna de datos
+        if (mainHeaderCells.length <= 2) {
+          // 1 Etiqueta + al menos 1 Atributo + 1 Controles
+          document.getElementById("alertMessage").innerText =
+            "Debe haber al menos una columna de datos para visualizar la tabla.";
+          const alertModal = new bootstrap.Modal(
+            document.getElementById("alertModal")
+          );
+          alertModal.show();
+          return;
+        }
+
+        // Crear cabeceras para el modal incluyendo la primera columna "Etiqueta" y excluyendo la última columna "Controles"
+        const modalHeaders = [];
+        for (let i = 0; i < mainHeaderCells.length - 1; i++) {
+          // Incluye la primera (Etiqueta) y excluye la última (Controles)
+          if (i === 0) {
+            modalHeaders.push(""); // Título fijo para la primera columna
+          } else {
+            const input = mainHeaderCells[i].querySelector("input");
+            const headerText = input ? input.value.trim() : `Atributo ${i}`;
+            modalHeaders.push(headerText);
+          }
+        }
+
+        // Renderizar cabeceras en el modal
+        modalHeaders.forEach((header) => {
+          const th = document.createElement("th");
+          th.textContent = header;
+          modalHeaderRow.appendChild(th);
+        });
+
+        // Crear filas de datos para el modal incluyendo la columna "Etiqueta" y excluyendo la última columna "Controles"
+        for (let i = 0; i < mainBodyRows.length; i++) {
+          const mainRow = mainBodyRows[i];
+          const modalRow = document.createElement("tr");
+
+          for (let j = 0; j < mainRow.cells.length - 1; j++) {
+            // Incluye la primera (Etiqueta) y excluye la última (Controles)
+            const input = mainRow.cells[j].querySelector("input");
+            const cellValue = input ? input.value.trim() : "";
+            const td = document.createElement("td");
+            td.textContent = cellValue;
+            modalRow.appendChild(td);
+          }
+
+          modalBody.appendChild(modalRow);
+        }
+      }
+
+      // Función para verificar si la tabla está completamente llena
+      function isTableFilled() {
+        const table = document.getElementById("dataTable");
+        const headerCells = table.rows[0].cells;
+        const bodyRows = table.tBodies[0].rows;
+
+        // Verificar encabezados
+        for (let i = 1; i < headerCells.length - 1; i++) {
+          const input = headerCells[i].querySelector("input");
+          if (!input || input.value.trim() === "") {
+            return false;
+          }
+        }
+
+        // Verificar filas de datos
+        for (let i = 0; i < bodyRows.length; i++) {
+          const row = bodyRows[i];
+          for (let j = 0; j < row.cells.length - 1; j++) {
+            const input = row.cells[j].querySelector("input");
+            if (!input || input.value.trim() === "") {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+      // Función para descargar la tabla como PNG
+      function downloadTableAsPNG() {
+        const tableSection = document.getElementById("tableSection");
+        html2canvas(tableSection)
+          .then((canvas) => {
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = "tabla.png";
+            link.click();
+          })
+          .catch((error) => {
+            console.error("Error al generar la imagen PNG:", error);
+            alert("Hubo un error al generar la imagen PNG.");
+          });
+      }
+
+      // Función para descargar la tabla como PDF
+      function downloadTableAsPDF() {
+        const tableSection = document.getElementById("tableSection");
+        html2canvas(tableSection)
+          .then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "pt", "a4");
+            const imgWidth = 595.28; // Ancho en puntos (pt) para A4
+            const pageHeight = 841.89; // Alto en puntos (pt) para A4
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft > 0) {
+              position = heightLeft - imgHeight;
+              pdf.addPage();
+              pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
             }
 
-            function removeRow(button) {
-                const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                if (tableBody.rows.length > 1) {
-                    const row = button.closest('tr');
-                    tableBody.removeChild(row);
-                    updateRowButtons();
-                }
+            pdf.save("tabla.pdf");
+          })
+          .catch((error) => {
+            console.error("Error al generar el PDF:", error);
+            alert("Hubo un error al generar el PDF.");
+          });
+      }
+
+      // Función para mostrar el modal de "Ver Gráfica"
+      function showChartModal() {
+        const chartModal = new bootstrap.Modal(
+          document.getElementById("chartModal")
+        );
+        const alertModal = new bootstrap.Modal(
+          document.getElementById("alertModal")
+        );
+        const chartTitle = document.getElementById("chartTitle").value;
+        const chartType = document.querySelector(
+          'input[name="chartType"]:checked'
+        ).value;
+
+        const table = document.getElementById("dataTable");
+        const headerCells = table.rows[0].cells;
+        const bodyRows = table.tBodies[0].rows;
+
+        // Verificar que no haya celdas vacías en los encabezados (Atributos)
+        let emptyHeaderFound = false;
+        for (let i = 1; i < headerCells.length - 1; i++) {
+          // Excluye "Etiqueta" y "Controles"
+          const input = headerCells[i].querySelector("input");
+          if (!input || input.value.trim() === "") {
+            emptyHeaderFound = true;
+            break;
+          }
+        }
+
+        // Verificar que no haya celdas vacías en las filas de datos
+        let emptyCellFound = false;
+        let rowDataCount = 0;
+        for (let i = 0; i < bodyRows.length; i++) {
+          const row = bodyRows[i];
+          let hasData = false;
+
+          for (let j = 0; j < row.cells.length - 1; j++) {
+            // Excluye "Etiqueta" y "Controles"
+            const input = row.cells[j].querySelector("input");
+            if (!input || input.value.trim() === "") {
+              emptyCellFound = true;
+              break;
             }
-
-            function updateRowButtons() {
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                const rows = Array.from(table.getElementsByTagName('tr'));
-                rows.forEach(row => {
-                    const deleteButton = row.cells[row.cells.length - 1].querySelector('.btn-danger');
-                    if (deleteButton) {
-                        deleteButton.disabled = rows.length === 1;
-                        deleteButton.classList.toggle('btn-disabled', rows.length === 1);
-                    }
-                });
+            if (j === 0 && input.value.trim() !== "") {
+              // Verificar "Etiqueta"
+              hasData = true;
             }
+          }
 
-            function updateColumnButtons() {
-                const table = document.getElementById('dataTable');
-                const deleteButtons = table.querySelectorAll('thead .btn-danger');
-                deleteButtons.forEach(button => {
-                    const headerRow = table.rows[0];
-                    button.disabled = headerRow.cells.length <= 3; // 1 Etiqueta + al menos 1 Atributo + 1 Controles
-                    if (button.disabled) {
-                        button.classList.add('btn-disabled');
-                    } else {
-                        button.classList.remove('btn-disabled');
-                    }
-                });
-            }
+          if (emptyCellFound) break;
+          if (hasData) rowDataCount++;
+        }
 
-            function checkColumnScroll() {
-                const container = document.querySelector('.table-container');
-                const table = document.getElementById('dataTable');
-                container.style.overflowX = table.rows[0].cells.length > 8 ? "auto" : "hidden"; // Ajusta el número según tus necesidades
-            }
+        // Si se encontraron celdas vacías, mostrar mensaje y detener la generación de la gráfica
+        if (emptyHeaderFound || emptyCellFound) {
+          document.getElementById("alertMessage").innerText =
+            "Por favor, completa todos los campos antes de generar la gráfica.";
+          alertModal.show();
+          return;
+        }
 
-            // Función para mostrar el modal de "Ver Tabla"
-            function showTableModal() {
-                populateTable(); // Llenar la tabla con los datos actuales
-                const tableModal = new bootstrap.Modal(document.getElementById('tableModal'));
-                tableModal.show();
-            }
+        // Verificar que haya al menos una columna y tres filas con datos para el gráfico de radar
+        if (chartType === "radar" && rowDataCount < 3) {
+          document.getElementById("alertMessage").innerText =
+            "El gráfico de radar necesita al menos 3 filas de datos.";
+          alertModal.show();
+          return;
+        }
 
-            // Función para llenar la tabla en el modal incluyendo la columna "Etiqueta"
-            function populateTable() {
-                const mainTable = document.getElementById('dataTable');
-                const modalHeaderRow = document.getElementById('tableHeaderRow');
-                const modalBody = document.getElementById('tableBody');
+        // Verificar que haya al menos una columna y una fila con datos para otros tipos de gráficos
+        if (headerCells.length - 2 < 1 || rowDataCount < 1) {
+          // Excluye "Etiqueta" y "Controles"
+          document.getElementById("alertMessage").innerText =
+            "Por favor, agrega datos suficientes para generar la gráfica.";
+          alertModal.show();
+          return;
+        }
 
-                // Limpiar contenido existente en el modal
-                modalHeaderRow.innerHTML = '';
-                modalBody.innerHTML = '';
+        document.getElementById("chartModalLabel").innerText = chartTitle;
 
-                // Obtener todas las filas de la tabla principal
-                const mainHeaderCells = mainTable.rows[0].cells;
-                const mainBodyRows = mainTable.tBodies[0].rows;
+        generateChart(chartType);
+        chartModal.show();
+      }
 
-                // Verificar que haya al menos una columna de datos
-                if (mainHeaderCells.length <= 2) { // 1 Etiqueta + al menos 1 Atributo + 1 Controles
-                    document.getElementById('alertMessage').innerText = "Debe haber al menos una columna de datos para visualizar la tabla.";
-                    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-                    alertModal.show();
-                    return;
-                }
+      // Función para obtener y ordenar los datos en una lista
+      function getOrderedDataList() {
+        const { datasets } = getTableData();
+        // Extraer y ordenar todos los valores numéricos de la tabla
+        return datasets
+          .flatMap((dataset) => dataset.data)
+          .filter((value) => !isNaN(value))
+          .sort((a, b) => a - b);
+      }
 
-                // Crear cabeceras para el modal incluyendo la primera columna "Etiqueta" y excluyendo la última columna "Controles"
-                const modalHeaders = [];
-                for (let i = 0; i < mainHeaderCells.length - 1; i++) { // Incluye la primera (Etiqueta) y excluye la última (Controles)
-                    if (i === 0) {
-                        modalHeaders.push(""); // Título fijo para la primera columna
-                    } else {
-                        const input = mainHeaderCells[i].querySelector('input');
-                        const headerText = input ? input.value.trim() : `Atributo ${i}`;
-                        modalHeaders.push(headerText);
-                    }
-                }
+      // Función para solicitar el número de clases y generar la distribución de frecuencias
+      function generateClassDistribution() {
+        // Solicitar el número de clases
+        const numClasses = parseInt(prompt("Ingrese el número de clases:"), 10);
 
-                // Renderizar cabeceras en el modal
-                modalHeaders.forEach(header => {
-                    const th = document.createElement('th');
-                    th.textContent = header;
-                    modalHeaderRow.appendChild(th);
-                });
+        // Verificar si el número de clases es válido
+        if (isNaN(numClasses) || numClasses <= 0) {
+          alert("Número de clases inválido. Ingrese un número mayor que 0.");
+          return;
+        }
 
-                // Crear filas de datos para el modal incluyendo la columna "Etiqueta" y excluyendo la última columna "Controles"
-                for (let i = 0; i < mainBodyRows.length; i++) {
-                    const mainRow = mainBodyRows[i];
-                    const modalRow = document.createElement('tr');
+        // Obtener todos los datos de la tabla
+        const { datasets } = getTableData();
+        const allData = datasets
+          .flatMap(dataset => dataset.data)
+          .filter(value => !isNaN(value));
 
-                    for (let j = 0; j < mainRow.cells.length - 1; j++) { // Incluye la primera (Etiqueta) y excluye la última (Controles)
-                        const input = mainRow.cells[j].querySelector('input');
-                        const cellValue = input ? input.value.trim() : '';
-                        const td = document.createElement('td');
-                        td.textContent = cellValue;
-                        modalRow.appendChild(td);
-                    }
+        // Calcular valores mínimo y máximo
+        const min = Math.min(...allData);
+        const max = Math.max(...allData);
 
-                    modalBody.appendChild(modalRow);
-                }
-            }
+        // Calcular la amplitud y el intervalo
+        const amplitude = max - min;
+        const interval = Math.ceil(amplitude / numClasses);
 
-            // Función para descargar la tabla como PNG
-            function downloadTableAsPNG() {
-                const tableSection = document.getElementById('tableSection');
-                html2canvas(tableSection).then(canvas => {
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'tabla.png';
-                    link.click();
-                }).catch(error => {
-                    console.error('Error al generar la imagen PNG:', error);
-                    alert('Hubo un error al generar la imagen PNG.');
-                });
-            }
+        let classLimits = [];
+        let lowerLimit = min;
 
-            // Función para descargar la tabla como PDF
-            function downloadTableAsPDF() {
-                const tableSection = document.getElementById('tableSection');
-                html2canvas(tableSection).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'pt', 'a4');
-                    const imgWidth = 595.28; // Ancho en puntos (pt) para A4
-                    const pageHeight = 841.89; // Alto en puntos (pt) para A4
-                    const imgHeight = canvas.height * imgWidth / canvas.width;
-                    let heightLeft = imgHeight;
-                    let position = 0;
+        // Generar límites de clases y puntos medios
+        for (let i = 0; i < numClasses; i++) {
+          const upperLimit = lowerLimit + interval - 1;
+          const midpoint = (lowerLimit + upperLimit) / 2;
 
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+          classLimits.push({
+            lowerLimit: lowerLimit,
+            upperLimit: upperLimit,
+            midpoint: midpoint.toFixed(2)
+          });
 
-                    while (heightLeft > 0) {
-                        position = heightLeft - imgHeight;
-                        pdf.addPage();
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight;
-                    }
+          lowerLimit = upperLimit + 1;
+        }
 
-                    pdf.save('tabla.pdf');
-                }).catch(error => {
-                    console.error('Error al generar el PDF:', error);
-                    alert('Hubo un error al generar el PDF.');
-                });
-            }
+        // Calcular las frecuencias para cada clase
+        const frequencies = calculateFrequencies(allData, classLimits);
 
-            // Función para mostrar el modal de "Ver Gráfica"
-            function showChartModal() {
-                const chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
-                const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-                const chartTitle = document.getElementById('chartTitle').value;
-                const chartType = document.querySelector('input[name="chartType"]:checked').value;
+        // Mostrar la tabla de distribución de frecuencias
+        displayFrequencyTable(frequencies);
+      }
 
-                const table = document.getElementById('dataTable');
-                const headerCells = table.rows[0].cells;
-                const bodyRows = table.tBodies[0].rows;
 
-                // Verificar que no haya celdas vacías en los encabezados (Atributos)
-                let emptyHeaderFound = false;
-                for (let i = 1; i < headerCells.length - 1; i++) { // Excluye "Etiqueta" y "Controles"
-                    const input = headerCells[i].querySelector('input');
-                    if (!input || input.value.trim() === '') {
-                        emptyHeaderFound = true;
-                        break;
-                    }
-                }
+      // Llamar a la función cuando el usuario desea ver medidas estadísticas
+      document.getElementById("showStatsButton").addEventListener("click", () => {
+        if (isTableFilled()) {
+          generateClassDistribution();
+          const statisticsModal = new bootstrap.Modal(document.getElementById("statisticsModal"));
+          statisticsModal.show();
+        } else {
+          document.getElementById("alertMessage").innerText = "Por favor, completa todos los campos antes de continuar.";
+          const alertModal = new bootstrap.Modal(document.getElementById("alertModal"));
+          alertModal.show();
+        }
+      });
 
-                // Verificar que no haya celdas vacías en las filas de datos
-                let emptyCellFound = false;
-                let rowDataCount = 0;
-                for (let i = 0; i < bodyRows.length; i++) {
-                    const row = bodyRows[i];
-                    let hasData = false;
+      // Función para generar el gráfico
+      function generateChart(chartType) {
+        const { labels, datasets } = getTableData();
+        const colors = [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+          "#B28DFF",
+          "#C9CBCF",
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+        ];
 
-                    for (let j = 0; j < row.cells.length - 1; j++) { // Excluye "Etiqueta" y "Controles"
-                        const input = row.cells[j].querySelector('input');
-                        if (!input || input.value.trim() === '') {
-                            emptyCellFound = true;
-                            break;
-                        }
-                        if (j === 0 && input.value.trim() !== '') { // Verificar "Etiqueta"
-                            hasData = true;
-                        }
-                    }
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
 
-                    if (emptyCellFound) break;
-                    if (hasData) rowDataCount++;
-                }
+        const ctx = document.getElementById("myChart").getContext("2d");
 
-                // Si se encontraron celdas vacías, mostrar mensaje y detener la generación de la gráfica
-                if (emptyHeaderFound || emptyCellFound) {
-                    document.getElementById('alertMessage').innerText = "Por favor, completa todos los campos antes de generar la gráfica.";
-                    alertModal.show();
-                    return;
-                }
+        let chartConfig;
 
-                // Verificar que haya al menos una columna y tres filas con datos para el gráfico de radar
-                if (chartType === 'radar' && rowDataCount < 3) {
-                    document.getElementById('alertMessage').innerText = "El gráfico de radar necesita al menos 3 filas de datos.";
-                    alertModal.show();
-                    return;
-                }
+        if (chartType === "pie") {
+          // Configuración para gráfico de pastel
+          const averages = labels.map((label, index) => {
+            const dataPerLabel = datasets
+              .map((ds) => ds.data[index])
+              .filter((value) => !isNaN(value));
+            const sum = dataPerLabel.reduce((a, b) => a + b, 0);
+            const avg =
+              dataPerLabel.length > 0 ? sum / dataPerLabel.length : 0;
+            return avg;
+          });
 
-                // Verificar que haya al menos una columna y una fila con datos para otros tipos de gráficos
-                if (headerCells.length - 2 < 1 || rowDataCount < 1) { // Excluye "Etiqueta" y "Controles"
-                    document.getElementById('alertMessage').innerText = "Por favor, agrega datos suficientes para generar la gráfica.";
-                    alertModal.show();
-                    return;
-                }
+          chartConfig = {
+            type: "pie",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  data: averages,
+                  backgroundColor: colors.slice(0, averages.length),
+                  borderColor: "#fff",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: "top" },
+                title: { display: false },
+                datalabels: {
+                  formatter: (value) => value.toFixed(2),
+                  color: "#000",
+                  font: { weight: "bold" },
+                },
+              },
+            },
+            plugins: [ChartDataLabels],
+          };
+        } else if (chartType === "radar") {
+          // Configuración para gráfico de radar
+          const adjustedLabels = datasets.map((ds) => ds.label);
 
-                document.getElementById('chartModalLabel').innerText = chartTitle;
+          const adjustedDatasets = labels.map((label, index) => ({
+            label: label,
+            data: datasets.map((ds) => ds.data[index]),
+            backgroundColor: `${colors[index % colors.length]}33`,
+            borderColor: colors[index % colors.length],
+            borderWidth: 2,
+            fill: true,
+          }));
 
-                generateChart(chartType);
-                chartModal.show();
-            }
+          chartConfig = {
+            type: "radar",
+            data: {
+              labels: adjustedLabels,
+              datasets: adjustedDatasets,
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  beginAtZero: true,
+                  grid: {
+                    circular: true,
+                  },
+                },
+              },
+              plugins: {
+                legend: { position: "top" },
+                title: { display: false },
+                datalabels: {
+                  formatter: (value) => value.toFixed(2),
+                  color: "#000",
+                  font: { weight: "bold" },
+                },
+              },
+            },
+            plugins: [ChartDataLabels],
+          };
+        } else {
+          // Configuración para gráficos de barras, líneas, etc.
+          const adjustedDatasets = datasets.map((ds, index) => ({
+            label: ds.label,
+            data: ds.data,
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length],
+            borderWidth: chartType === "line" ? 2 : 1,
+            fill: chartType !== "line",
+          }));
 
-            // Función para generar el gráfico
-            function generateChart(chartType) {
-                const { labels, datasets } = getTableData();
-                const colors = [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                    '#9966FF', '#FF9F40', '#B28DFF', '#C9CBCF',
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
-                ];
+          const hideDataLabels = chartType === "line";
 
-                if (chartInstance) {
-                    chartInstance.destroy();
-                }
+          chartConfig = {
+            type: chartType === "horizontalBar" ? "bar" : chartType,
+            data: {
+              labels: labels,
+              datasets: adjustedDatasets,
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              indexAxis: chartType === "horizontalBar" ? "y" : "x",
+              scales: {
+                [chartType === "horizontalBar" ? "y" : "x"]: {
+                  beginAtZero: true,
+                },
+                y: {
+                  beginAtZero: true,
+                },
+              },
+              plugins: {
+                legend: { position: "top" },
+                title: { display: false },
+                datalabels: hideDataLabels
+                  ? false
+                  : {
+                    formatter: (value) => value.toFixed(2),
+                    color: "#000",
+                    font: { weight: "bold" },
+                  },
+              },
+            },
+            plugins: [ChartDataLabels],
+          };
+        }
 
-                const ctx = document.getElementById('myChart').getContext('2d');
+        chartInstance = new Chart(ctx, chartConfig);
+        document.getElementById("chartDescription").innerText =
+          document.getElementById("chartDesc").value;
+      }
 
-                let chartConfig;
+      // Función para obtener los datos de la tabla
+      function getTableData() {
+        const table = document.getElementById("dataTable");
+        const labels = [];
+        const datasets = [];
 
-                if (chartType === 'pie') {
-                    // Configuración para gráfico de pastel
-                    const averages = labels.map((label, index) => {
-                        const dataPerLabel = datasets.map(ds => ds.data[index]).filter(value => !isNaN(value));
-                        const sum = dataPerLabel.reduce((a, b) => a + b, 0);
-                        const avg = dataPerLabel.length > 0 ? sum / dataPerLabel.length : 0;
-                        return avg;
-                    });
+        // Obtener etiquetas de columnas (cabecera)
+        for (let i = 1; i < table.rows[0].cells.length - 1; i++) {
+          // Excluye "Etiqueta" y "Controles"
+          const labelInput =
+            table.rows[0].cells[i].getElementsByTagName("input")[0];
+          const label = labelInput
+            ? labelInput.value.trim()
+            : `Atributo ${i}`;
+          labels.push(label);
+        }
 
-                    chartConfig = {
-                        type: 'pie',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: averages,
-                                backgroundColor: colors.slice(0, averages.length),
-                                borderColor: '#fff',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { position: 'top' },
-                                title: { display: false },
-                                datalabels: {
-                                    formatter: (value) => value.toFixed(2),
-                                    color: '#000',
-                                    font: { weight: 'bold' }
-                                }
-                            }
-                        },
-                        plugins: [ChartDataLabels]
-                    };
-                } else if (chartType === 'radar') {
-                    // Configuración para gráfico de radar
-                    const adjustedLabels = datasets.map(ds => ds.label);
+        // Obtener datos de filas (atributos)
+        for (let i = 0; i < table.tBodies[0].rows.length; i++) {
+          const row = table.tBodies[0].rows[i];
+          const attributeInput =
+            row.cells[0].getElementsByTagName("input")[0];
+          const attributeName = attributeInput
+            ? attributeInput.value.trim()
+            : `Fila ${i + 1}`;
+          const data = [];
+          for (let j = 1; j < row.cells.length - 1; j++) {
+            // Excluye "Etiqueta" y "Controles"
+            const valueInput = row.cells[j].getElementsByTagName("input")[0];
+            const value = valueInput ? parseFloat(valueInput.value) : NaN;
+            data.push(value);
+          }
+          datasets.push({
+            label: attributeName,
+            data: data,
+            borderWidth: 1,
+          });
+        }
 
-                    const adjustedDatasets = labels.map((label, index) => ({
-                        label: label,
-                        data: datasets.map(ds => ds.data[index]),
-                        backgroundColor: `${colors[index % colors.length]}33`,
-                        borderColor: colors[index % colors.length],
-                        borderWidth: 2,
-                        fill: true
-                    }));
+        return { labels, datasets };
+      }
 
-                    chartConfig = {
-                        type: 'radar',
-                        data: {
-                            labels: adjustedLabels,
-                            datasets: adjustedDatasets
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                r: {
-                                    beginAtZero: true,
-                                    grid: {
-                                        circular: true
-                                    }
-                                }
-                            },
-                            plugins: {
-                                legend: { position: 'top' },
-                                title: { display: false },
-                                datalabels: {
-                                    formatter: (value) => value.toFixed(2),
-                                    color: '#000',
-                                    font: { weight: 'bold' }
-                                }
-                            }
-                        },
-                        plugins: [ChartDataLabels]
-                    };
-                } else {
-                    // Configuración para gráficos de barras, líneas, etc.
-                    const adjustedDatasets = datasets.map((ds, index) => ({
-                        label: ds.label,
-                        data: ds.data,
-                        backgroundColor: colors[index % colors.length],
-                        borderColor: colors[index % colors.length],
-                        borderWidth: chartType === 'line' ? 2 : 1,
-                        fill: chartType !== 'line',
-                    }));
+      // Funciones para calcular y mostrar estadísticas
+      function showStatisticsModal() {
+        const statisticsModal = new bootstrap.Modal(
+          document.getElementById("statisticsModal")
+        );
+        const { datasets } = getTableData();
+        const allData = datasets
+          .flatMap((dataset) => dataset.data)
+          .filter((value) => !isNaN(value));
 
-                    const hideDataLabels = chartType === 'line';
+        if (allData.length > 0) {
+          calculateStatistics();
+          const limits = calculateClassLimits(allData, 6);
+          const frequencies = calculateFrequencies(allData, limits);
+          displayFrequencyTable(frequencies);
+        }
 
-                    chartConfig = {
-                        type: chartType === 'horizontalBar' ? 'bar' : chartType,
-                        data: {
-                            labels: labels,
-                            datasets: adjustedDatasets
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            indexAxis: chartType === 'horizontalBar' ? 'y' : 'x',
-                            scales: {
-                                [chartType === 'horizontalBar' ? 'y' : 'x']: {
-                                    beginAtZero: true
-                                },
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                legend: { position: 'top' },
-                                title: { display: false },
-                                datalabels: hideDataLabels ? false : {
-                                    formatter: (value) => value.toFixed(2),
-                                    color: '#000',
-                                    font: { weight: 'bold' }
-                                }
-                            }
-                        },
-                        plugins: [ChartDataLabels]
-                    };
-                }
+        statisticsModal.show();
+      }
 
-                chartInstance = new Chart(ctx, chartConfig);
-                document.getElementById('chartDescription').innerText = document.getElementById('chartDesc').value;
-            }
+      function calculateStatistics() {
+        const { datasets } = getTableData();
+        const allData = datasets
+          .flatMap((dataset) => dataset.data)
+          .filter((value) => !isNaN(value))
+          .sort((a, b) => a - b);
 
-            // Función para obtener los datos de la tabla
-            function getTableData() {
-                const table = document.getElementById('dataTable');
-                const labels = [];
-                const datasets = [];
+        // Calcular la media, mediana y moda
+        const mean = (
+          allData.reduce((acc, val) => acc + val, 0) / allData.length
+        ).toFixed(2);
+        const median =
+          allData.length % 2 === 0
+            ? (
+              (allData[allData.length / 2 - 1] +
+                allData[allData.length / 2]) /
+              2
+            ).toFixed(2)
+            : allData[Math.floor(allData.length / 2)].toFixed(2);
 
-                // Obtener etiquetas de columnas (cabecera)
-                for (let i = 1; i < table.rows[0].cells.length - 1; i++) { // Excluye "Etiqueta" y "Controles"
-                    const labelInput = table.rows[0].cells[i].getElementsByTagName('input')[0];
-                    const label = labelInput ? labelInput.value.trim() : `Atributo ${i}`;
-                    labels.push(label);
-                }
+        const mode = calculateMode(allData);
 
-                // Obtener datos de filas (atributos)
-                for (let i = 0; i < table.tBodies[0].rows.length; i++) {
-                    const row = table.tBodies[0].rows[i];
-                    const attributeInput = row.cells[0].getElementsByTagName('input')[0];
-                    const attributeName = attributeInput ? attributeInput.value.trim() : `Fila ${i + 1}`;
-                    const data = [];
-                    for (let j = 1; j < row.cells.length - 1; j++) { // Excluye "Etiqueta" y "Controles"
-                        const valueInput = row.cells[j].getElementsByTagName('input')[0];
-                        const value = valueInput ? parseFloat(valueInput.value) : NaN;
-                        data.push(value);
-                    }
-                    datasets.push({
-                        label: attributeName,
-                        data: data,
-                        borderWidth: 1
-                    });
-                }
+        // Calcular cuartiles y percentiles
+        const quartiles = calculateQuartiles(allData);
+        const percentiles = calculatePercentiles(allData);
 
-                return { labels, datasets };
-            }
-
-            // Funciones para calcular y mostrar estadísticas
-            function showStatisticsModal() {
-                const statisticsModal = new bootstrap.Modal(document.getElementById('statisticsModal'));
-                const { datasets } = getTableData();
-                const allData = datasets.flatMap(dataset => dataset.data).filter(value => !isNaN(value));
-
-                if (allData.length > 0) {
-                    calculateStatistics();
-                    const limits = calculateClassLimits(allData, 6);
-                    const frequencies = calculateFrequencies(allData, limits);
-                    displayFrequencyTable(frequencies);
-                }
-
-                statisticsModal.show();
-            }
-
-            function calculateStatistics() {
-                const { datasets } = getTableData();
-                const allData = datasets.flatMap(dataset => dataset.data).filter(value => !isNaN(value)).sort((a, b) => a - b);
-
-                // Calcular la media, mediana y moda
-                const mean = (allData.reduce((acc, val) => acc + val, 0) / allData.length).toFixed(2);
-                const median = (allData.length % 2 === 0) ?
-                    ((allData[allData.length / 2 - 1] + allData[allData.length / 2]) / 2).toFixed(2) :
-                    allData[Math.floor(allData.length / 2)].toFixed(2);
-
-                const mode = calculateMode(allData);
-
-                // Calcular cuartiles y percentiles
-                const quartiles = calculateQuartiles(allData);
-                const percentiles = calculatePercentiles(allData);
-
-                // Mostrar los resultados
-                document.getElementById('median').innerText = `Mediana: ${median}`;
-                document.getElementById('mode').innerText = mode;
-                document.getElementById('mean').innerText = `Media Aritmética: ${mean}`; // Agregado debajo de la moda
-                document.getElementById('quartiles').innerHTML = `
+        // Mostrar los resultados
+        document.getElementById("median").innerText = `Mediana: ${median}`;
+        document.getElementById("mode").innerText = mode;
+        document.getElementById(
+          "mean"
+        ).innerText = `Media Aritmética: ${mean}`; // Agregado debajo de la moda
+        document.getElementById("quartiles").innerHTML = `
             <strong>Cuartiles:</strong><br>
             Q1: ${quartiles.Q1}<br>
             Q2 (Mediana): ${quartiles.Q2}<br>
             Q3: ${quartiles.Q3}
         `;
-                document.getElementById('percentiles').innerHTML = `
+        document.getElementById("percentiles").innerHTML = `
             <strong>Percentil 25:</strong> ${percentiles.P25}<br>
             <strong>Percentil 50 (Mediana):</strong> ${percentiles.P50}<br>
             <strong>Percentil 75:</strong> ${percentiles.P75}
         `;
+      }
+
+      function calculateMode(data) {
+        const modeMap = new Map();
+        let maxFrequency = 0;
+        let mode = [];
+
+        data.forEach((value) => {
+          const count = modeMap.get(value) || 0;
+          modeMap.set(value, count + 1);
+          if (count + 1 > maxFrequency) {
+            maxFrequency = count + 1;
+          }
+        });
+
+        modeMap.forEach((frequency, value) => {
+          if (frequency === maxFrequency) {
+            mode.push(value);
+          }
+        });
+
+        if (mode.length >= 3) {
+          return "Sin moda.";
+        } else if (mode.length === 1) {
+          return `Moda: ${mode[0]}`;
+        } else {
+          return `Modas: ${mode.join(", ")}`;
+        }
+      }
+
+      function calculateQuartiles(data) {
+        const Q1 = calculatePercentile(data, 25);
+        const Q2 = calculatePercentile(data, 50); // Mediana
+        const Q3 = calculatePercentile(data, 75);
+
+        return { Q1, Q2, Q3 };
+      }
+
+      function calculatePercentiles(data) {
+        const P25 = calculatePercentile(data, 25);
+        const P50 = calculatePercentile(data, 50);
+        const P75 = calculatePercentile(data, 75);
+
+        return { P25, P50, P75 };
+      }
+
+      function calculatePercentile(data, percentile) {
+        const index = (percentile / 100) * (data.length - 1);
+        const lower = Math.floor(index);
+        const upper = Math.ceil(index);
+        if (lower === upper) return data[lower];
+        return (
+          data[lower] +
+          (index - lower) * (data[upper] - data[lower])
+        ).toFixed(2);
+      }
+
+      function calculateClassLimits(dataList, classCount) {
+        const min = dataList[0];
+        const max = dataList[dataList.length - 1];
+        const amplitude = max - min;
+        const interval = amplitude / classCount;
+
+        let limits = [];
+        let lowerLimit = min;
+
+        for (let i = 0; i < classCount; i++) {
+          const upperLimit = i === classCount - 1 ? max : lowerLimit + interval - 1;
+          const realLower = lowerLimit - 0.5;
+          const realUpper = upperLimit + 0.5;
+          const midpoint = ((lowerLimit + upperLimit) / 2).toFixed(2);
+
+          limits.push({
+            indicated: `${lowerLimit.toFixed(2)} - ${upperLimit.toFixed(2)}`,
+            real: `${realLower.toFixed(2)} - ${realUpper.toFixed(2)}`,
+            midpoint: midpoint,
+            hasDecimal: lowerLimit % 1 !== 0 || upperLimit % 1 !== 0, // Verificar si el intervalo tiene decimales
+          });
+
+          lowerLimit = upperLimit + 1;
+        }
+        return limits;
+      }
+
+      function calculateFrequencies(dataList, limits) {
+        const total = dataList.length;
+        let cumulativeLess = 0;
+        let frequencies = limits.map((limit) => ({
+          indicatedLimits: limit.indicated,
+          realLimits: limit.real,
+          midpoint: limit.midpoint,
+          absolute: 0,
+        }));
+
+        dataList.forEach((value) => {
+          for (let i = 0; i < frequencies.length; i++) {
+            const [lower, upper] = frequencies[i].indicatedLimits.split(" - ").map(Number);
+            const hasDecimal = lower % 1 !== 0 || upper % 1 !== 0;
+
+            if (hasDecimal) {
+              // Si el intervalo tiene decimales, contar valores completos dentro del rango
+              // incluyendo el entero del límite inferior.
+              if ((value >= lower && value <= upper) || Math.floor(value) === Math.floor(lower)) {
+                frequencies[i].absolute++;
+                break;
+              }
+            } else {
+              // Si el intervalo no tiene decimales, considerar solo la parte entera del valor
+              const integerValue = Math.floor(value);
+              if (integerValue >= Math.floor(lower) && integerValue <= Math.floor(upper)) {
+                frequencies[i].absolute++;
+                break;
+              }
             }
+          }
+        });
 
-            function calculateMode(data) {
-                const modeMap = new Map();
-                let maxFrequency = 0;
-                let mode = [];
+        // Cálculo de frecuencias relativas y acumuladas
+        frequencies.forEach((item) => {
+          const relative = (item.absolute / total) * 100;
+          cumulativeLess += item.absolute;
+          item.relative = `${relative.toFixed(2)}%`;
+          item.cumulativeLess = cumulativeLess;
+          item.cumulativeRelativeLess = `${((cumulativeLess / total) * 100).toFixed(2)}%`;
+          item.cumulativeMore = total - cumulativeLess;
+          item.cumulativeRelativeMore = `${(((total - cumulativeLess) / total) * 100).toFixed(2)}%`;
+        });
 
-                data.forEach(value => {
-                    const count = modeMap.get(value) || 0;
-                    modeMap.set(value, count + 1);
-                    if (count + 1 > maxFrequency) {
-                        maxFrequency = count + 1;
-                    }
-                });
+        return frequencies;
+      }
 
-                modeMap.forEach((frequency, value) => {
-                    if (frequency === maxFrequency) {
-                        mode.push(value);
-                    }
-                });
 
-                if (mode.length >= 3) {
-                    return "Sin moda.";
-                } else if (mode.length === 1) {
-                    return `Moda: ${mode[0]}`;
-                } else {
-                    return `Modas: ${mode.join(", ")}`;
-                }
+      function generateFrequencyTable(classCount) {
+        const data = getDataFromTableFrecuency();
+        const frequencyTableBody = document.getElementById('statisticsBody'); // Asegúrate de que el ID coincida con tu tabla
+        frequencyTableBody.innerHTML = ''; // Limpiar la tabla anterior
+
+        const min = Math.min(...data);
+        const max = Math.max(...data);
+        const amplitude = max - min;
+        const intervalo = amplitude / classCount; // No usamos toFixed aquí
+        document.getElementById('amplitude').innerText = `Amplitud: ${amplitude}`;
+        document.getElementById('intervalo').innerText = `Intervalo de Clase: ${intervalo}`;
+
+        let cumulativeFrequencyLess = 0;
+        let cumulativeRelativeLess = 0;
+        let totalAbsoluteFrequency = 0;
+        let totalRelativeFrequency = 0;
+
+        // Variables para las sumatorias necesarias para calcular varianza y desviación estándar
+        let sumXiFi = 0;
+        let sumXiSquareFi = 0;
+
+        const totalFrequency = data.length;
+        let cumulativeFrequencyMore = totalFrequency;
+        let cumulativeRelativeMore = 100;
+
+        let lowerLimitIndicated = min; // Inicializa el límite inferior
+
+        for (let i = 0; i < classCount; i++) {
+          const upperLimitIndicated = lowerLimitIndicated + intervalo;
+
+          const lowerLimitReal = lowerLimitIndicated - 0.5;
+          const upperLimitReal = upperLimitIndicated + 0.5;
+
+          // Punto Medio (Xi)
+          const midpoint = (lowerLimitIndicated + upperLimitIndicated) / 2;
+
+          // Frecuencia Absoluta (Fi)
+          const absoluteFrequency = data.filter(value => {
+            const integerValue = Math.floor(value);
+            if (lowerLimitIndicated % 1 !== 0 || upperLimitIndicated % 1 !== 0) {
+              // Si el intervalo tiene decimales, contar valores con decimales exactos
+              return value >= lowerLimitIndicated && value <= upperLimitIndicated;
+            } else {
+              // Si el intervalo no tiene decimales, contar solo los valores enteros
+              return integerValue >= Math.floor(lowerLimitIndicated) && integerValue <= Math.floor(upperLimitIndicated);
             }
+          }).length;
 
-            function calculateQuartiles(data) {
-                const Q1 = calculatePercentile(data, 25);
-                const Q2 = calculatePercentile(data, 50); // Mediana
-                const Q3 = calculatePercentile(data, 75);
+          totalAbsoluteFrequency += absoluteFrequency;
 
-                return { Q1, Q2, Q3 };
-            }
+          // Frecuencia Relativa (%)
+          const relativeFrequency = (absoluteFrequency / totalFrequency) * 100;
+          totalRelativeFrequency += relativeFrequency;
 
-            function calculatePercentiles(data) {
-                const P25 = calculatePercentile(data, 25);
-                const P50 = calculatePercentile(data, 50);
-                const P75 = calculatePercentile(data, 75);
+          // Acumulativos "menos de" y "más de" para Absoluta y Relativa
+          cumulativeFrequencyLess += absoluteFrequency;
+          cumulativeRelativeLess += relativeFrequency;
+          const cumulativeFrequencyMoreRow = cumulativeFrequencyMore;
+          const cumulativeRelativeMoreRow = cumulativeRelativeMore;
+          cumulativeFrequencyMore -= absoluteFrequency;
+          cumulativeRelativeMore -= relativeFrequency;
 
-                return { P25, P50, P75 };
-            }
+          // Sumatorias para varianza y desviación estándar
+          sumXiFi += midpoint * absoluteFrequency;
+          sumXiSquareFi += Math.pow(midpoint, 2) * absoluteFrequency;
 
-            function calculatePercentile(data, percentile) {
-                const index = (percentile / 100) * (data.length - 1);
-                const lower = Math.floor(index);
-                const upper = Math.ceil(index);
-                if (lower === upper) return data[lower];
-                return (data[lower] + (index - lower) * (data[upper] - data[lower])).toFixed(2);
-            }
+          // Agregar fila a la tabla
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${lowerLimitIndicated} - ${upperLimitIndicated}</td>
+            <td>${lowerLimitReal} - ${upperLimitReal}</td>
+            <td>${midpoint}</td>
+            <td>${absoluteFrequency}</td>
+            <td>${relativeFrequency.toFixed(2)}%</td>
+            <td>${cumulativeFrequencyLess}</td>
+            <td>${cumulativeRelativeLess.toFixed(2)}%</td>
+            <td>${cumulativeFrequencyMoreRow}</td>
+            <td>${cumulativeRelativeMoreRow.toFixed(2)}%</td>
+        `;
+          frequencyTableBody.appendChild(row);
 
-            function calculateClassLimits(data, classCount) {
-                const min = Math.min(...data);
-                const max = Math.max(...data);
-                const range = max - min;
-                const classWidth = Math.ceil(range / classCount);
+          // Actualizar el límite inferior para la próxima iteración
+          lowerLimitIndicated = upperLimitIndicated;
+        }
 
-                let limits = [];
-                for (let i = 0; i < classCount; i++) {
-                    let lower = min + i * classWidth;
-                    let upper = lower + classWidth - 1;
+        // Cálculo de la media aritmética
+        const validData = data.filter(value => !isNaN(value));
+        const meanValue = (validData.reduce((acc, val) => acc + val, 0) / validData.length).toFixed(2);
 
-                    // Evitar que el límite superior exceda el máximo de los datos
-                    if (upper > max) {
-                        upper = max;
-                    }
+        // Cálculo de la varianza
+        const variance = (sumXiSquareFi - (Math.pow(sumXiFi, 2) / totalAbsoluteFrequency)) / (totalAbsoluteFrequency - 1);
 
-                    let realLower = lower - 0.5;
-                    let realUpper = upper + 0.5;
-                    let midPoint = ((lower + upper) / 2).toFixed(2);
+        // Cálculo de la desviación estándar
+        const stdDeviation = Math.sqrt(variance);
 
-                    limits.push({
-                        indicated: `${lower} - ${upper}`,
-                        real: `${realLower.toFixed(1)} - ${realUpper.toFixed(1)}`,
-                        midPoint: midPoint
-                    });
+        // Cálculo del coeficiente de variación
+        const coefficientOfVariation = (stdDeviation / meanValue) * 100;
 
-                    if (upper === max) break; // Detener si el límite superior alcanza el máximo
-                }
+        // Mostrar resultados de las estadísticas en el modal de distribución de frecuencias
+        document.getElementById('meanFrec').innerText = `Media Aritmética: ${meanValue}`;
+        document.getElementById('sumXiFi').innerText = `Sumatoria Absoluta + Medios: ${sumXiFi}`;
+        document.getElementById('sumXiSquareFi').innerText = `Sumatoria Absoluta + Medios a la 2: ${sumXiSquareFi}`;
+        document.getElementById('meanDeviationFrec').innerText = `Desviación Media: ${stdDeviation.toFixed(2)}`;
+        document.getElementById('varianceFrec').innerText = `Varianza: ${variance.toFixed(2)}`;
+        document.getElementById('stdDeviationFrec').innerText = `Desviación Estándar: ${stdDeviation.toFixed(2)}`;
+        document.getElementById('coefficientOfVariationFrec').innerText = `Coeficiente de Variación: ${coefficientOfVariation.toFixed(2)}%`;
 
-                return limits;
-            }
+        // Agregar fila de totales a la tabla
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+        <td colspan="3"><strong>TOTAL</strong></td>
+        <td><strong>${totalAbsoluteFrequency}</strong></td>
+        <td><strong>${totalRelativeFrequency.toFixed(2)}%</strong></td>
+        <td colspan="4"></td>
+    `;
+        frequencyTableBody.appendChild(totalRow);
+      }
 
-            function calculateFrequencies(data, limits) {
-                let freqArray = limits.map(limit => ({
-                    indicatedLimits: limit.indicated,
-                    realLimits: limit.real,
-                    midPoint: limit.midPoint,
-                    absolute: 0
-                }));
 
-                data.forEach(value => {
-                    for (let i = 0; i < freqArray.length; i++) {
-                        let [lower, upper] = freqArray[i].indicatedLimits.split(" - ").map(Number);
-                        if (value >= lower && value <= upper) {
-                            freqArray[i].absolute++;
-                            break;
-                        }
-                    }
-                });
 
-                // Calcular las frecuencias relativas y acumuladas
-                const total = data.length;
-                let cumulativeLess = 0;
-                freqArray.forEach((item, index) => {
-                    item.relative = ((item.absolute / total) * 100).toFixed(2) + "%";
-                    cumulativeLess += item.absolute;
-                    item.cumulativeLess = cumulativeLess;
-                    item.cumulativeMore = total - cumulativeLess;
-                });
 
-                return freqArray;
-            }
+      function displayFrequencyTable(frequencies) {
+        const tableBody = document.getElementById("statisticsBody");
+        tableBody.innerHTML = "";  // Limpiar contenido existente en la tabla
 
-            function displayFrequencyTable(frequencies) {
-                const tableBody = document.getElementById('statisticsBody');
-                tableBody.innerHTML = '';
-
-                frequencies.forEach(freq => {
-                    const row = `
+        frequencies.forEach((freq) => {
+          const row = `
             <tr>
                 <td>${freq.indicatedLimits}</td>
                 <td>${freq.realLimits}</td>
-                <td>${freq.midPoint}</td>
+                <td>${freq.midpoint}</td>
                 <td>${freq.absolute}</td>
                 <td>${freq.relative}</td>
                 <td>${freq.cumulativeLess}</td>
-                <td>${((freq.cumulativeLess / frequencies.length) * 100).toFixed(2)}%</td>
+                <td>${freq.cumulativeRelativeLess}</td>
                 <td>${freq.cumulativeMore}</td>
-                <td>${((freq.cumulativeMore / frequencies.length) * 100).toFixed(2)}%</td>
+                <td>${freq.cumulativeRelativeMore}</td>
             </tr>`;
-                    tableBody.innerHTML += row;
-                });
+          tableBody.innerHTML += row;
+        });
 
-                // Calcular y mostrar los totales
-                document.getElementById('totalAbsolute').textContent = frequencies.reduce((sum, item) => sum + item.absolute, 0);
-                document.getElementById('totalRelative').textContent = frequencies.reduce((sum, item) => sum + parseFloat(item.relative), 0).toFixed(2) + "%";
-            }
+        // Mostrar totales al final de la tabla
+        document.getElementById("totalAbsolute").textContent = frequencies.reduce((sum, item) => sum + item.absolute, 0);
+        document.getElementById("totalRelative").textContent = "100.00%";  // Siempre debería sumar 100%
+      }
 
-            // Funciones para descargar la gráfica como PDF
-            async function downloadChartAsPDF() {
-                const { jsPDF } = window.jspdf;
-                const canvas = document.getElementById('myChart');
-                const imgData = canvas.toDataURL('image/png');
 
-                // Crear un nuevo documento PDF
-                const pdf = new jsPDF({
-                    orientation: 'landscape', // Opcional: Ajusta la orientación si es necesario
-                    unit: 'px',
-                    format: [canvas.width, canvas.height] // Ajustar tamaño del PDF al tamaño del canvas
-                });
+      // Funciones para descargar la gráfica como PDF
+      async function downloadChartAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const canvas = document.getElementById("myChart");
+        const imgData = canvas.toDataURL("image/png");
 
-                // Agregar la imagen al PDF
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        // Crear un nuevo documento PDF
+        const pdf = new jsPDF({
+          orientation: "landscape", // Opcional: Ajusta la orientación si es necesario
+          unit: "px",
+          format: [canvas.width, canvas.height], // Ajustar tamaño del PDF al tamaño del canvas
+        });
 
-                // Descargar el PDF
-                pdf.save('grafica.pdf');
-            }
+        // Agregar la imagen al PDF
+        pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
 
-            // Función para descargar la gráfica como PNG
-            function downloadChartAsPNG() {
-                const canvas = document.getElementById('myChart');
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = 'grafica.png';
-                link.click();
-            }
-        </script>
-    </div>
+        // Descargar el PDF
+        pdf.save("grafica.pdf");
+      }
+
+      // Función para descargar la gráfica como PNG
+      function downloadChartAsPNG() {
+        const canvas = document.getElementById("myChart");
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "grafica.png";
+        link.click();
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const welcomeModal = new bootstrap.Modal(
+          document.getElementById("welcomeModal")
+        );
+        const acceptButton = document.getElementById("acceptButton");
+
+        // Mostrar el modal de bienvenida al cargar la página
+        welcomeModal.show();
+
+        // Cargar contenido del archivo Readme.md
+        fetch("Readme.md")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("readmeContent").innerHTML = data;
+          })
+          .catch((error) => {
+            document.getElementById("readmeContent").innerText =
+              "No se pudo cargar la guía de uso.";
+            console.error("Error al cargar Readme.md:", error);
+          });
+
+        // Cerrar el modal cuando el usuario presiona el botón Aceptar
+        acceptButton.addEventListener("click", function () {
+          welcomeModal.hide();
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        const welcomeModal = new bootstrap.Modal(
+          document.getElementById("welcomeModal")
+        );
+        const userGuideButton = document.getElementById("userGuideButton");
+        const acceptButton = document.getElementById("acceptButton");
+
+        // Mostrar el modal de bienvenida al hacer clic en el botón de Guía de Usuario
+        userGuideButton.addEventListener("click", function () {
+          welcomeModal.show();
+        });
+
+        // Cargar contenido del archivo Readme.md
+        fetch("Readme.md")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("readmeContent").innerHTML = data;
+          })
+          .catch((error) => {
+            document.getElementById("readmeContent").innerText =
+              "No se pudo cargar la guía de uso.";
+            console.error("Error al cargar Readme.md:", error);
+          });
+
+        // Cerrar el modal cuando el usuario presiona el botón Aceptar
+        acceptButton.addEventListener("click", function () {
+          welcomeModal.hide();
+        });
+      });
+    </script>
+  </div>
 </body>
 
 </html>
