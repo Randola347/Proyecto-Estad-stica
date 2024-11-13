@@ -1453,28 +1453,7 @@
         </p>
     `;
               }
-              // Función para mostrar la desviación estándar
-              function displayStandardDeviationResult() {
-                // Obtener el valor de la varianza calculada desde el DOM
-                const varianceText = document.getElementById('varianceResult').textContent;
-                const varianceValue = parseFloat(varianceText.split('=')[1].trim());
-
-                // Calcular la desviación estándar
-                const stdDeviation = Math.sqrt(varianceValue);
-
-                // Mostrar el resultado en la tabla con el formato adecuado
-                const stdDeviationCell = document.getElementById('stdDeviationResult');
-                stdDeviationCell.innerHTML = `
-        <p style="text-align: center; font-size: 1.5em;">
-            <span>S =</span>
-            <span style="border-top: 1px solid black; display: inline-block; padding: 0 5px;">
-                √${varianceValue.toFixed(8)}
-            </span>
-            <br>
-            <span>= ${stdDeviation.toFixed(3)}</span>
-        </p>
-    `;
-              }
+              
 
               // Funciones para descargar la gráfica como PDF
               async function downloadChartAsPDF() {
